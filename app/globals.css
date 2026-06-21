@@ -1,0 +1,260 @@
+/* styles/globals.css */
+/* Fonts loaded via <link> in app/layout.tsx */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --- CSS Variables ----------------------------------- */
+:root {
+  --color-gold: #C9A227;
+  --color-gold-light: #D9B44A;
+  --color-gold-muted: rgba(201, 162, 39, 0.15);
+  --color-champagne: #F2E3C6;
+  --color-ivory: #FAF8F4;
+  --color-ivory-warm: #F5F0E8;
+  --color-charcoal: #1C1C1C;
+  --color-charcoal-muted: #4A4A4A;
+  --color-taupe: #8B7355;
+  --color-taupe-pale: #D4C4A8;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Jost', system-ui, sans-serif;
+  --max-width-site: 1440px;
+  --max-width-content: 1200px;
+  --max-width-narrow: 720px;
+  --section-padding: 120px;
+  --section-padding-sm: 80px;
+  --section-padding-xs: 60px;
+}
+
+/* --- Base Styles ------------------------------------- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--color-ivory);
+    color: var(--color-charcoal);
+    font-family: var(--font-sans);
+    font-weight: 300;
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    color: var(--color-charcoal);
+  }
+
+  p {
+    color: var(--color-charcoal-muted);
+    font-weight: 300;
+    line-height: 1.8;
+  }
+
+  ::selection {
+    background-color: var(--color-gold);
+    color: white;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* --- Component Utilities ----------------------------- */
+@layer components {
+  /* Container */
+  .container-site {
+    @apply mx-auto w-full px-5 sm:px-8 lg:px-12 xl:px-16;
+    max-width: var(--max-width-site);
+  }
+
+  .container-content {
+    @apply mx-auto w-full px-5 sm:px-8 lg:px-12;
+    max-width: var(--max-width-content);
+  }
+
+  .container-narrow {
+    @apply mx-auto w-full px-5 sm:px-8;
+    max-width: var(--max-width-narrow);
+  }
+
+  /* Section spacing */
+  .section-padding {
+    @apply py-16 md:py-24 lg:py-32;
+  }
+
+  .section-padding-sm {
+    @apply py-12 md:py-16 lg:py-24;
+  }
+
+  /* Gold divider */
+  .gold-divider {
+    @apply block h-px bg-gold opacity-30;
+  }
+
+  .gold-divider-short {
+    @apply block h-px w-16 bg-gold;
+  }
+
+  /* Typography */
+  .heading-display {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 6vw, 5.5rem);
+    font-weight: 400;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+
+  .heading-xl {
+    font-family: var(--font-serif);
+    font-size: clamp(2rem, 4vw, 3.75rem);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+  }
+
+  .heading-lg {
+    font-family: var(--font-serif);
+    font-size: clamp(1.75rem, 3vw, 2.75rem);
+    font-weight: 400;
+    line-height: 1.15;
+  }
+
+  .heading-md {
+    font-family: var(--font-serif);
+    font-size: clamp(1.375rem, 2.5vw, 2rem);
+    font-weight: 400;
+    line-height: 1.2;
+  }
+
+  .label-text {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--color-gold);
+  }
+
+  /* Buttons */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-8 py-3.5 text-sm font-medium tracking-widest uppercase;
+    @apply bg-gold text-white;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:bg-gold-dark hover:shadow-luxury;
+    font-family: var(--font-sans);
+  }
+
+  .btn-outline {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-8 py-3.5 text-sm font-medium tracking-widest uppercase;
+    @apply border border-gold text-gold bg-transparent;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:bg-gold hover:text-white;
+    font-family: var(--font-sans);
+  }
+
+  .btn-outline-white {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-8 py-3.5 text-sm font-medium tracking-widest uppercase;
+    @apply border border-white text-white bg-transparent;
+    @apply transition-all duration-300 ease-out;
+    @apply hover:bg-white hover:text-charcoal;
+    font-family: var(--font-sans);
+  }
+
+  /* Cards */
+  .card-luxury {
+    @apply bg-white shadow-card transition-shadow duration-500;
+    @apply hover:shadow-card-hover;
+  }
+
+  /* Form inputs */
+  .input-luxury {
+    @apply w-full bg-transparent border-b border-taupe-pale;
+    @apply py-3 text-sm font-light text-charcoal placeholder:text-taupe;
+    @apply focus:outline-none focus:border-gold;
+    @apply transition-colors duration-300;
+    font-family: var(--font-sans);
+  }
+
+  .input-luxury-box {
+    @apply w-full bg-ivory-warm;
+    @apply px-4 py-3 text-sm font-light text-charcoal placeholder:text-taupe;
+    @apply focus:outline-none;
+    @apply transition-all duration-300;
+    font-family: var(--font-sans);
+    border: 1px solid #DDD;
+  }
+  .input-luxury-box:focus {
+    border-color: #C8A45C;
+    box-shadow: 0 0 0 3px rgba(200, 164, 92, 0.12);
+  }
+}
+
+/* --- Animations -------------------------------------- */
+@layer utilities {
+  .animate-delay-100 { animation-delay: 100ms; }
+  .animate-delay-200 { animation-delay: 200ms; }
+  .animate-delay-300 { animation-delay: 300ms; }
+  .animate-delay-400 { animation-delay: 400ms; }
+  .animate-delay-500 { animation-delay: 500ms; }
+  .animate-delay-600 { animation-delay: 600ms; }
+
+  .opacity-0-init { opacity: 0; }
+
+  /* Reveal on scroll (JS adds this class) */
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* --- Scrollbar --------------------------------------- */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ivory);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold);
+  border-radius: 2px;
+}
+
+/* --- Image overlay ----------------------------------- */
+.img-overlay::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 60%, transparent 100%);
+}
+
+/* --- Swiper custom ----------------------------------- */
+.swiper-pagination-bullet {
+  background: var(--color-gold) !important;
+  opacity: 0.4;
+}
+.swiper-pagination-bullet-active {
+  opacity: 1;
+  transform: scale(1.2);
+}

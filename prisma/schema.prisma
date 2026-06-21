@@ -1,0 +1,144 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- Enums -----------------------------------------------
+
+enum InquiryStatus {
+  PENDING
+  CONTACTED
+  CONFIRMED
+  CANCELLED
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
+
+enum BookingSource {
+  WEBSITE
+  MANUAL
+}
+
+// --- Models ----------------------------------------------
+
+model Apartment {
+  id              String   @id @default(cuid())
+  name            String
+  internalName    String?  // Admin reference (e.g. CAT-01). Optional, not shown to guests.
+  slug            String   @unique
+  tagline         String?
+  description     String
+  longDescription String?
+  pricePerNight   Float
+  maxGuests       Int      @default(2)
+  bedrooms        Int      @default(1)
+  bathrooms       Int      @default(1)
+  size            Int?
+  location        String
+  amenities       String[]
+  images          String[]
+  featured        Boolean  @default(false)
+  active          Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  inquiries       BookingInquiry[]
+  bookings        Booking[]
+  blockedDates    BlockedDate[]
+  seasonPrices    SeasonPrice[]
+
+  @@map("apartments")
+}
+
+model BookingInquiry {
+  id          String        @id @default(cuid())
+  apartmentId String
+  name        String
+  email       String
+  phone       String?
+  checkIn     DateTime
+  checkOut    DateTime
+  guests      Int           @default(1)
+  message     String?
+  status      InquiryStatus @default(PENDING)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  apartment   Apartment     @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@map("booking_inquiries")
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  apartmentId   String
+  checkIn       DateTime
+  checkOut      DateTime
+  guests        Int           @default(1)
+  status        BookingStatus @default(PENDING)
+  source        BookingSource @default(WEBSITE)
+  guestName     String?
+  guestEmail    String?
+  guestPhone    String?
+  pricePerNight Float?
+  totalPrice    Float?
+  notes         String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  apartment     Apartment     @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@map("bookings")
+}
+
+model BlockedDate {
+  id          String    @id @default(cuid())
+  apartmentId String
+  startDate   DateTime
+  endDate     DateTime
+  reason      String?
+  createdAt   DateTime  @default(now())
+
+  apartment   Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@map("blocked_dates")
+}
+
+model SeasonPrice {
+  id            String    @id @default(cuid())
+  apartmentId   String
+  label         String
+  startDate     DateTime
+  endDate       DateTime
+  pricePerNight Float
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  apartment     Apartment @relation(fields: [apartmentId], references: [id], onDelete: Cascade)
+
+  @@map("season_prices")
+}
+
+model SiteSettings {
+  id             String   @id @default(cuid())
+  siteName       String   @default("Cataleya Residence")
+  contactEmail   String   @default("hello@cataleyaresidence.com")
+  phoneNumber    String   @default("+387 61 000 000")
+  whatsappNumber String   @default("+387603088762")
+  viberNumber    String   @default("+387603088762")
+  bookingEmail   String   @default("fodesign9@gmail.com")
+  currency       String   @default("EUR")
+  updatedAt      DateTime @updatedAt
+
+  @@map("site_settings")
+}
