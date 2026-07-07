@@ -23,21 +23,31 @@ const inp = 'w-full border border-gray-200 px-4 py-2.5 text-sm focus:outline-non
 
 const imageHelpers: Record<string, { label: string; urls: string[] }> = {
   presidentSuite: {
-    label: 'Load President Suite images',
+    label: 'Load Cataleya 1 images',
     urls: [
-      '/images/apartments/president-suite/hero.jpg',
-      '/images/apartments/president-suite/bedroom.jpg',
-      '/images/apartments/president-suite/bathroom.jpg',
-      '/images/apartments/president-suite/view.jpg',
+      '/images/apartments/Cataleya-1/bedroom-0.jpg',
+      '/images/apartments/Cataleya-1/bedroom-1.jpg',
+      '/images/apartments/Cataleya-1/bedroom-2.jpg',
+      '/images/apartments/Cataleya-1/bedroom-3.jpg',
+      '/images/apartments/Cataleya-1/bedroom-4.jpg',
+      '/images/apartments/Cataleya-1/enterance-1.jpg',
+      '/images/apartments/Cataleya-1/livingroom-2.jpg',
+      '/images/apartments/Cataleya-1/livingroom-3.jpg',
+      '/images/apartments/Cataleya-1/livingroom0.jpg',
     ],
   },
   cataleya3: {
     label: 'Load Cataleya 3 images',
     urls: [
       '/images/apartments/cataleya-3/livingroom.jpg',
+      '/images/apartments/cataleya-3/livingroom0.jpg',
+      '/images/apartments/cataleya-3/livingroom1.jpg',
       '/images/apartments/cataleya-3/masterroom.jpg',
-      '/images/apartments/cataleya-3/bedroom1.jpg',
+      '/images/apartments/cataleya-3/livingroom4.jpg',
+      '/images/apartments/cataleya-3/hodnik.jpg',
+      '/images/apartments/cataleya-3/enterance1.jpg',
       '/images/apartments/cataleya-3/bathroom.jpg',
+      '/images/apartments/cataleya-3/bedroom1.jpg',
     ],
   },
   maisonNoire: {
@@ -50,12 +60,14 @@ const imageHelpers: Record<string, { label: string; urls: string[] }> = {
     ],
   },
   cataleya1: {
-    label: 'Load Cataleya 1 images',
+    label: 'Load Cataleya 2 images',
     urls: [
-      '/images/apartments/cataleya-1/livingroom0.jpg',
-      '/images/apartments/cataleya-1/bedroom-1.jpg',
-      '/images/apartments/cataleya-1/bathroom.jpg',
-      '/images/apartments/cataleya-1/livingroom-2.jpg',
+      '/images/apartments/cataleya 2/IMG-20260707-WA0002.jpg',
+      '/images/apartments/cataleya 2/IMG-20260707-WA0003.jpg',
+      '/images/apartments/cataleya 2/IMG-20260707-WA0004.jpg',
+      '/images/apartments/cataleya 2/IMG-20260707-WA0005.jpg',
+      '/images/apartments/cataleya 2/IMG-20260707-WA0006.jpg',
+      '/images/apartments/cataleya 2/IMG-20260707-WA0007.jpg',
     ],
   },
 }
