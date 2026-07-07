@@ -6,41 +6,7 @@ import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { verifyAdminSession } from '@/lib/auth'
-
-// Shared overlap check -- bookings + blocked_dates
-export async function checkAvailability(
-  apartmentId: string,
-  checkIn: Date,
-  checkOut: Date,
-  excludeBookingId?: string
-): Promise<{ available: boolean; reason?: string }> {
-
-  const bookingOverlap = await prisma.booking.count({
-    where: {
-      apartmentId,
-      id: excludeBookingId ? { not: excludeBookingId } : undefined,
-      status: { in: ['PENDING', 'CONFIRMED'] },
-      AND: [{ checkIn: { lt: checkOut } }, { checkOut: { gt: checkIn } }],
-    },
-  })
-
-  if (bookingOverlap > 0) {
-    return { available: false, reason: 'These dates overlap with an existing booking.' }
-  }
-
-  const blockedOverlap = await prisma.blockedDate.count({
-    where: {
-      apartmentId,
-      AND: [{ startDate: { lt: checkOut } }, { endDate: { gt: checkIn } }],
-    },
-  })
-
-  if (blockedOverlap > 0) {
-    return { available: false, reason: 'These dates are blocked.' }
-  }
-
-  return { available: true }
-}
+import { checkAvailability, parseDateInput, validateStayDates } from '@/lib/availability'
 
 // Feature 1: Manual booking
 
@@ -85,11 +51,12 @@ export async function createManualBooking(
     checkIn, checkOut, guests, pricePerNight, totalPrice, notes,
   } = validated.data
 
-  const checkInDate  = new Date(checkIn)
-  const checkOutDate = new Date(checkOut)
+  const checkInDate  = parseDateInput(checkIn)
+  const checkOutDate = parseDateInput(checkOut)
 
-  if (checkInDate >= checkOutDate) {
-    return { success: false, message: 'Check-out must be after check-in.' }
+  const dateCheck = validateStayDates(checkInDate, checkOutDate)
+  if (!dateCheck.ok) {
+    return { success: false, message: dateCheck.message }
   }
 
   const avail = await checkAvailability(apartmentId, checkInDate, checkOutDate)

@@ -1,4 +1,6 @@
 // app/admin/pricing/page.tsx
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { SeasonPriceForm } from '@/components/admin/SeasonPriceForm'
 import { DeleteSeasonButton } from '@/components/admin/DeleteSeasonButton'

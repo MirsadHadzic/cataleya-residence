@@ -1,4 +1,6 @@
 // app/admin/bookings/page.tsx
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { BookingStatusButtons } from '@/components/admin/BookingStatusButtons'
 import { BlockDatesForm } from '@/components/admin/BlockDatesForm'
@@ -146,9 +148,9 @@ export default async function AdminBookingsPage() {
                   const style = STATUS_STYLES[booking.status] || STATUS_STYLES.PENDING
                   const ppn = booking.pricePerNight ?? booking.apartment.pricePerNight
                   const total = booking.totalPrice ?? nights * ppn
+                  const guestName = booking.guestName || inquiry?.name
+                  const guestEmail = booking.guestEmail || inquiry?.email
                   const isManual = booking.source === 'MANUAL'
-                  const guestName = isManual ? booking.guestName : inquiry?.name
-                  const guestEmail = isManual ? booking.guestEmail : inquiry?.email
 
                   return (
                     <tr key={booking.id} className="hover:bg-gray-50/60 transition-colors">
@@ -201,8 +203,8 @@ export default async function AdminBookingsPage() {
               const style = STATUS_STYLES[booking.status] || STATUS_STYLES.PENDING
               const ppn = booking.pricePerNight ?? booking.apartment.pricePerNight
               const total = booking.totalPrice ?? nights * ppn
+              const guestName = booking.guestName || inquiry?.name
               const isManual = booking.source === 'MANUAL'
-              const guestName = isManual ? booking.guestName : inquiry?.name
 
               return (
                 <div key={booking.id} className="bg-white border border-gray-200 p-5 space-y-4">

@@ -1,4 +1,6 @@
 // app/admin/settings/page.tsx
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { SettingsForm } from '@/components/admin/SettingsForm'
 

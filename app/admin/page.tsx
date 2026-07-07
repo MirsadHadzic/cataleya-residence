@@ -1,4 +1,6 @@
-// app/admin/bookings/page.tsx
+// app/admin/page.tsx
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { BookingStatusButtons } from '@/components/admin/BookingStatusButtons'
 import { CalendarCheck, Users } from 'lucide-react'

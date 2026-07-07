@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { sendBookingNotification, sendGuestConfirmation } from '@/lib/email'
+import { checkAvailability, parseDateInput, validateStayDates } from '@/lib/availability'
 
 const bookingSchema = z.object({
   apartmentId: z.string().min(1, 'Apartment is required'),
@@ -20,24 +21,6 @@ export type BookingFormState = {
   success: boolean
   message: string
   errors?: Record<string, string[]>
-}
-
-async function isAvailable(
-  apartmentId: string,
-  checkIn: Date,
-  checkOut: Date
-): Promise<boolean> {
-  const overlapping = await prisma.booking.count({
-    where: {
-      apartmentId,
-      status: { in: ['PENDING', 'CONFIRMED'] },
-      AND: [
-        { checkIn: { lt: checkOut } },
-        { checkOut: { gt: checkIn } },
-      ],
-    },
-  })
-  return overlapping === 0
 }
 
 export async function submitBookingInquiry(
@@ -67,24 +50,16 @@ export async function submitBookingInquiry(
 
   const { apartmentId, name, email, phone, checkIn, checkOut, guests, message } = validated.data
 
-  const checkInDate = new Date(checkIn)
-  const checkOutDate = new Date(checkOut)
+  const checkInDate = parseDateInput(checkIn)
+  const checkOutDate = parseDateInput(checkOut)
 
-  if (checkInDate >= checkOutDate) {
+  const dateCheck = validateStayDates(checkInDate, checkOutDate)
+  if (!dateCheck.ok) {
+    const field = dateCheck.message.includes('past') ? 'checkIn' : 'checkOut'
     return {
       success: false,
-      message: 'Check-out must be after check-in.',
-      errors: { checkOut: ['Check-out date must be after check-in date.'] },
-    }
-  }
-
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  if (checkInDate < today) {
-    return {
-      success: false,
-      message: 'Check-in date cannot be in the past.',
-      errors: { checkIn: ['Check-in date cannot be in the past.'] },
+      message: dateCheck.message,
+      errors: { [field]: [dateCheck.message] },
     }
   }
 
@@ -106,8 +81,11 @@ export async function submitBookingInquiry(
       }
     }
 
-    const available = await isAvailable(apartmentId, checkInDate, checkOutDate)
-    if (!available) {
+    // Only confirmed bookings block new inquiries — pending requests do not hold dates
+    const avail = await checkAvailability(apartmentId, checkInDate, checkOutDate, {
+      includePending: false,
+    })
+    if (!avail.available) {
       return {
         success: false,
         message: 'Selected dates are not available.',
@@ -118,35 +96,23 @@ export async function submitBookingInquiry(
       }
     }
 
-    // Write both records atomically
-    await prisma.$transaction([
-      prisma.bookingInquiry.create({
-        data: {
-          apartmentId,
-          name,
-          email,
-          phone,
-          checkIn: checkInDate,
-          checkOut: checkOutDate,
-          guests,
-          message: message || null,
-          status: 'PENDING',
-        },
-      }),
-      prisma.booking.create({
-        data: {
-          apartmentId,
-          checkIn: checkInDate,
-          checkOut: checkOutDate,
-          guests,
-          status: 'PENDING',
-        },
-      }),
-    ])
+    // Inquiry only — booking is created when admin confirms / converts
+    await prisma.bookingInquiry.create({
+      data: {
+        apartmentId,
+        name,
+        email,
+        phone,
+        checkIn: checkInDate,
+        checkOut: checkOutDate,
+        guests,
+        message: message || null,
+        status: 'PENDING',
+      },
+    })
 
     revalidatePath('/admin/inquiries')
 
-    // Admin notification -- fire and forget
     sendBookingNotification({
       apartmentName: apartment.name,
       checkIn: checkInDate,
@@ -158,7 +124,6 @@ export async function submitBookingInquiry(
       message: message || null,
     }).catch((err) => console.error('Background email error:', err))
 
-    // Guest confirmation -- fire and forget
     sendGuestConfirmation({
       apartmentName: apartment.name,
       checkIn: checkInDate,

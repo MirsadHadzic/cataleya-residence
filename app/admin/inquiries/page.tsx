@@ -1,4 +1,6 @@
 // app/admin/inquiries/page.tsx
+export const dynamic = 'force-dynamic'
+
 import { prisma } from '@/lib/prisma'
 import { InquiryActionButtons } from '@/components/admin/InquiryActionButtons'
 import { MessageSquare } from 'lucide-react'

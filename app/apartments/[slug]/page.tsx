@@ -82,11 +82,11 @@ export default async function ApartmentDetailPage({ params }: Props) {
       }).format(apartment.pricePerNight)
     ),
     getBookingSignal(apartment.id),
-    // Fetch future confirmed/pending bookings for the calendar
+    // Only confirmed bookings block the public calendar (pending inquiries do not hold dates)
     prisma.booking.findMany({
       where: {
         apartmentId: apartment.id,
-        status: { in: ['PENDING', 'CONFIRMED'] },
+        status: 'CONFIRMED',
         checkOut: { gte: new Date() },
       },
       select: { checkIn: true, checkOut: true },

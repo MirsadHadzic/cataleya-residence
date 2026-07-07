@@ -21,6 +21,45 @@ interface Props {
 const init: AptFormState = { success: false, message: '' }
 const inp = 'w-full border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gold font-sans font-light'
 
+const imageHelpers: Record<string, { label: string; urls: string[] }> = {
+  presidentSuite: {
+    label: 'Load President Suite images',
+    urls: [
+      '/images/apartments/president-suite/hero.jpg',
+      '/images/apartments/president-suite/bedroom.jpg',
+      '/images/apartments/president-suite/bathroom.jpg',
+      '/images/apartments/president-suite/view.jpg',
+    ],
+  },
+  cataleya3: {
+    label: 'Load Cataleya 3 images',
+    urls: [
+      '/images/apartments/cataleya-3/livingroom.jpg',
+      '/images/apartments/cataleya-3/masterroom.jpg',
+      '/images/apartments/cataleya-3/bedroom1.jpg',
+      '/images/apartments/cataleya-3/bathroom.jpg',
+    ],
+  },
+  maisonNoire: {
+    label: 'Load Maison Noire images',
+    urls: [
+      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=85',
+      'https://images.unsplash.com/photo-1614604600420-f1b3b1e74f3b?w=1200&q=85',
+      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&q=85',
+      'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=1200&q=85',
+    ],
+  },
+  cataleya1: {
+    label: 'Load Cataleya 1 images',
+    urls: [
+      '/images/apartments/cataleya-1/livingroom0.jpg',
+      '/images/apartments/cataleya-1/bedroom-1.jpg',
+      '/images/apartments/cataleya-1/bathroom.jpg',
+      '/images/apartments/cataleya-1/livingroom-2.jpg',
+    ],
+  },
+}
+
 export function ApartmentForm({ action, initialData = {}, submitLabel = 'Save Apartment' }: Props) {
   const [state, formAction, pending] = useActionState(action, init)
   const err = state.errors ?? {}
@@ -29,12 +68,15 @@ export function ApartmentForm({ action, initialData = {}, submitLabel = 'Save Ap
   const [name, setName] = useState(initialData.name ?? '')
   const [slug, setSlug] = useState(initialData.slug ?? '')
   const [autoSlug, setAutoSlug] = useState(!initialData.slug)
+  const [images, setImages] = useState((initialData.images ?? []).join('\n'))
 
   useEffect(() => {
     if (autoSlug) {
       setSlug(name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''))
     }
   }, [name, autoSlug])
+
+  const imageUrls = images.split('\n').map((line) => line.trim()).filter(Boolean)
 
   return (
     <form action={formAction} className="bg-white border border-gray-200 p-8 space-y-6">
@@ -134,15 +176,26 @@ export function ApartmentForm({ action, initialData = {}, submitLabel = 'Save Ap
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Image URLs <span className="normal-case tracking-normal text-gray-400">(one per line)</span>
-          </label>
-          <textarea name="images" rows={5} defaultValue={(initialData.images ?? []).join('\n')}
+          <div className="flex flex-col gap-3 mb-2 md:flex-row md:items-center md:justify-between">
+            <label className="block text-xs font-sans uppercase tracking-widest text-gray-500">
+              Image URLs <span className="normal-case tracking-normal text-gray-400">(one per line)</span>
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {Object.values(imageHelpers).map((helper) => (
+                <button key={helper.label} type="button" onClick={() => setImages(helper.urls.join('\n'))}
+                  className="text-xs text-gold font-sans hover:text-charcoal transition-colors border border-transparent hover:border-gold px-2 py-1 rounded">
+                  {helper.label}
+                </button>
+              ))}
+            </div>
+          </div>
+          <textarea name="images" rows={5} value={images}
+            onChange={(e) => setImages(e.target.value)}
             placeholder="https://images.unsplash.com/..." className={`${inp} resize-none font-mono text-xs`} />
           {/* Image preview */}
-          {(initialData.images ?? []).length > 0 && (
+          {imageUrls.length > 0 && (
             <div className="flex gap-2 mt-2 flex-wrap">
-              {(initialData.images ?? []).slice(0,4).map((url, i) => (
+              {imageUrls.slice(0, 4).map((url, i) => (
                 <div key={i} className="relative w-16 h-12 overflow-hidden border border-gray-200">
                   <img src={url} alt="" className="w-full h-full object-cover" />
                 </div>

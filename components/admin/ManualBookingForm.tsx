@@ -14,6 +14,10 @@ function fmt(d: Date) {
   return d.toISOString().split('T')[0]
 }
 
+function todayKey() {
+  return fmt(new Date())
+}
+
 export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
   const [state, action, pending] = useActionState(createManualBooking, init)
   const [selectedApt, setSelectedApt] = useState(apartments[0]?.id ?? '')
@@ -105,6 +109,7 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
           </label>
           <input
             name="checkIn" type="date" required
+            min={todayKey()}
             value={checkIn} onChange={(e) => setCheckIn(e.target.value)}
             className={inp}
           />
@@ -115,6 +120,7 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
           </label>
           <input
             name="checkOut" type="date" required
+            min={checkIn || todayKey()}
             value={checkOut} onChange={(e) => setCheckOut(e.target.value)}
             className={inp}
           />
