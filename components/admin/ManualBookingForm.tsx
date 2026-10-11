@@ -6,12 +6,15 @@ import { createManualBooking, ManualBookingState } from '@/actions/adminBooking'
 import { AlertCircle, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 
-interface Apt { id: string; name: string; pricePerNight: number }
+interface Apt { id: string; name: string; pricePerNight: number; maxGuests: number }
 
 const init: ManualBookingState = { success: false, message: '' }
 
 function fmt(d: Date) {
-  return d.toISOString().split('T')[0]
+  const year = d.getFullYear()
+  const month = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
 }
 
 function todayKey() {
@@ -24,12 +27,17 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
   const [checkIn, setCheckIn]   = useState(fmt(new Date()))
   const [checkOut, setCheckOut] = useState(fmt(new Date(Date.now() + 86400000)))
   const [ppn, setPpn] = useState(apartments[0]?.pricePerNight ?? 0)
+  const [guestCount, setGuestCount] = useState(Math.min(2, apartments[0]?.maxGuests ?? 2))
   const [total, setTotal] = useState(0)
+  const selectedApartment = apartments.find((apartment) => apartment.id === selectedApt)
 
   // Auto-update price when apartment changes
   useEffect(() => {
     const apt = apartments.find((a) => a.id === selectedApt)
-    if (apt) setPpn(apt.pricePerNight)
+    if (apt) {
+      setPpn(apt.pricePerNight)
+      setGuestCount((current) => Math.min(current, apt.maxGuests))
+    }
   }, [selectedApt, apartments])
 
   // Auto-calculate total
@@ -44,7 +52,7 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
   const inp = 'w-full border border-gray-200 px-4 py-2.5 text-sm focus:outline-none focus:border-gold font-sans font-light'
 
   return (
-    <form action={action} className="bg-white border border-gray-200 p-8 space-y-5">
+    <form action={action} className="bg-white border border-gray-200 p-4 sm:p-6 md:p-8 space-y-5">
 
       {state.message && !state.success && (
         <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-100">
@@ -56,7 +64,7 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
       {/* Apartment */}
       <div>
         <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-          Apartment *
+          Apartman *
         </label>
         <select
           name="apartmentId"
@@ -72,40 +80,49 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
       </div>
 
       {/* Guest info */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Guest Name *
+            Ime gosta *
           </label>
           <input name="guestName" type="text" required placeholder="Full name" className={inp} />
           {err.guestName && <p className="text-red-500 text-xs mt-1">{err.guestName[0]}</p>}
         </div>
         <div>
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Guest Email *
+            E-mail gosta *
           </label>
           <input name="guestEmail" type="email" required placeholder="email@example.com" className={inp} />
           {err.guestEmail && <p className="text-red-500 text-xs mt-1">{err.guestEmail[0]}</p>}
         </div>
         <div>
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Phone
+            Telefon
           </label>
           <input name="guestPhone" type="tel" placeholder="+387 61 000 000" className={inp} />
         </div>
         <div>
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Guests *
+            Broj gostiju *
           </label>
-          <input name="guests" type="number" min="1" max="20" defaultValue="2" required className={inp} />
+          <input
+            name="guests"
+            type="number"
+            min="1"
+            max={selectedApartment?.maxGuests ?? 20}
+            value={guestCount}
+            onChange={(e) => setGuestCount(Number(e.target.value))}
+            required
+            className={inp}
+          />
         </div>
       </div>
 
       {/* Dates */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Check In *
+            Dolazak *
           </label>
           <input
             name="checkIn" type="date" required
@@ -116,7 +133,7 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
         </div>
         <div>
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Check Out *
+            Odlazak *
           </label>
           <input
             name="checkOut" type="date" required
@@ -128,10 +145,10 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
       </div>
 
       {/* Pricing */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Price / Night (EUR) *
+            Cijena / noć (EUR) *
           </label>
           <input
             name="pricePerNight" type="number" step="0.01" required
@@ -141,7 +158,7 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
         </div>
         <div>
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Total Price (EUR) *
+            Ukupna cijena (EUR) *
           </label>
           <input
             name="totalPrice" type="number" step="0.01" required
@@ -154,9 +171,9 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
       {/* Notes */}
       <div>
         <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-          Notes (internal)
+          Napomene (interne)
         </label>
-        <textarea name="notes" rows={3} placeholder="Internal notes, special arrangements..." className={`${inp} resize-none`} />
+        <textarea name="notes" rows={3} placeholder="Interne napomene, posebni dogovori..." className={`${inp} resize-none`} />
       </div>
 
       {/* Actions */}
@@ -166,10 +183,10 @@ export function ManualBookingForm({ apartments }: { apartments: Apt[] }) {
           className="flex items-center gap-2 px-6 py-2.5 bg-charcoal text-white text-sm font-sans hover:bg-charcoal-light transition-colors disabled:opacity-60"
         >
           {pending && <Loader2 size={14} className="animate-spin" />}
-          Create Booking
+          Kreiraj rezervaciju
         </button>
         <Link href="/admin/bookings" className="text-sm text-gray-500 hover:text-charcoal font-sans transition-colors">
-          Cancel
+          Odustani
         </Link>
       </div>
     </form>

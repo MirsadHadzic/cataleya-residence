@@ -1,22 +1,32 @@
 // app/admin/layout.tsx
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import { Home, Building2, CalendarCheck, BookOpen, Tag, Settings, LogOut, Globe, Menu, X } from 'lucide-react'
 import { logoutAction } from '@/actions/auth'
 
 const navItems = [
-  { icon: Home, label: 'Dashboard', href: '/admin' },
-  { icon: Building2, label: 'Apartments', href: '/admin/apartments' },
-  { icon: BookOpen, label: 'Bookings', href: '/admin/bookings' },
-  { icon: CalendarCheck, label: 'Inquiries', href: '/admin/inquiries' },
-  { icon: Tag, label: 'Pricing', href: '/admin/pricing' },
-  { icon: Settings, label: 'Settings', href: '/admin/settings' },
+  { icon: Home, label: 'Početna', href: '/admin' },
+  { icon: Building2, label: 'Apartmani', href: '/admin/apartments' },
+  { icon: BookOpen, label: 'Rezervacije', href: '/admin/bookings' },
+  { icon: CalendarCheck, label: 'Zahtjevi', href: '/admin/inquiries' },
+  { icon: Tag, label: 'Cijene', href: '/admin/pricing' },
+  { icon: Settings, label: 'Postavke', href: '/admin/settings' },
 ]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const pathname = usePathname()
+
+  useEffect(() => {
+    const previousLanguage = document.documentElement.lang
+    document.documentElement.lang = 'bs'
+    return () => { document.documentElement.lang = previousLanguage }
+  }, [])
+
+  if (pathname === '/admin/login') return children
 
   const handleLinkClick = () => {
     setIsMobileOpen(false)
@@ -28,13 +38,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className="px-6 py-8 border-b border-white/10 flex justify-between items-center">
         <div>
           <div className="text-gold text-xs tracking-[0.2em] uppercase font-sans mb-1">Cataleya</div>
-          <div className="text-white font-serif text-xl">Admin</div>
+          <div className="text-white font-serif text-xl">Administracija</div>
         </div>
         {/* Mobile close button */}
         <button
           onClick={() => setIsMobileOpen(false)}
           className="md:hidden text-white/60 hover:text-white p-1"
-          aria-label="Close menu"
+          aria-label="Zatvori meni"
         >
           <X size={20} />
         </button>
@@ -63,7 +73,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           className="flex items-center gap-3 px-4 py-2.5 text-white/40 hover:text-white/70 transition-colors text-xs font-sans"
         >
           <Globe size={14} />
-          View Website
+          Pogledaj stranicu
         </Link>
         <form action={logoutAction}>
           <button
@@ -71,7 +81,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             className="w-full flex items-center gap-3 px-4 py-2.5 text-red-400/50 hover:text-red-400 hover:bg-red-500/5 transition-all duration-200 text-xs font-sans text-left cursor-pointer"
           >
             <LogOut size={14} />
-            Sign Out
+            Odjavi se
           </button>
         </form>
       </div>
@@ -109,21 +119,20 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <button
               onClick={() => setIsMobileOpen(true)}
               className="md:hidden p-1.5 -ml-1 text-charcoal hover:bg-gray-100 rounded transition-colors"
-              aria-label="Open menu"
+              aria-label="Otvori meni"
             >
               <Menu size={20} strokeWidth={1.5} />
             </button>
             <h1 className="font-serif text-xl text-charcoal">Cataleya Residence</h1>
           </div>
-          <span className="text-xs text-gray-400 font-sans hidden sm:inline">Admin Dashboard</span>
+          <span className="text-xs text-gray-400 font-sans hidden sm:inline">Administrativni panel</span>
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
           {children}
         </main>
       </div>
     </div>
   )
 }
-

@@ -25,7 +25,12 @@ function getTodayTomorrow() {
   const today = new Date()
   const tomorrow = new Date(today)
   tomorrow.setDate(today.getDate() + 1)
-  const fmt = (d: Date) => d.toISOString().split('T')[0]
+  const fmt = (d: Date) => {
+    const year = d.getFullYear()
+    const month = String(d.getMonth() + 1).padStart(2, '0')
+    const day = String(d.getDate()).padStart(2, '0')
+    return `${year}-${month}-${day}`
+  }
   return { today: fmt(today), tomorrow: fmt(tomorrow) }
 }
 
@@ -128,7 +133,7 @@ export function BookingInquiryForm({
 
   const isUnavailableError =
     !state.success &&
-    state.message === 'Selected dates are not available.'
+    state.message === 'Odabrani datumi nisu dostupni.'
 
   const err = state.errors || {}
 
@@ -138,13 +143,12 @@ export function BookingInquiryForm({
       <div className="space-y-6">
         <div className="flex flex-col items-center text-center py-4 gap-3">
           <CheckCircle size={36} className="text-gold" strokeWidth={1.5} />
-          <h3 className="font-serif text-xl text-charcoal">Request sent successfully</h3>
+          <h3 className="font-serif text-xl text-charcoal">Zahtjev je uspješno poslan</h3>
           <p className="text-taupe text-sm font-sans font-light leading-relaxed">
-            We will contact you shortly to confirm availability and details.
-            For faster response, contact us directly on WhatsApp.
+            {state.message}
           </p>
           <p className="text-taupe/70 text-xs font-sans font-light">
-            Typically responds within 10--15 minutes
+            Obično odgovaramo u roku od 10–15 minuta.
           </p>
         </div>
 

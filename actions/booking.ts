@@ -3,17 +3,17 @@
 import { z } from 'zod'
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
-import { sendBookingNotification, sendGuestConfirmation } from '@/lib/email'
+import { sendBookingNotification, sendBookingRequestReceived } from '@/lib/email'
 import { checkAvailability, parseDateInput, validateStayDates } from '@/lib/availability'
 
 const bookingSchema = z.object({
   apartmentId: z.string().min(1, 'Apartment is required'),
-  name: z.string().min(2, 'Name must be at least 2 characters'),
-  email: z.string().min(1, 'Email is required').email('Please enter a valid email address'),
-  phone: z.string().min(6, 'Phone number is required'),
-  checkIn: z.string().min(1, 'Check-in date is required'),
-  checkOut: z.string().min(1, 'Check-out date is required'),
-  guests: z.coerce.number().min(1, 'At least 1 guest required').max(20),
+  name: z.string().min(2, 'Ime mora sadržavati najmanje 2 znaka.'),
+  email: z.string().min(1, 'E-mail adresa je obavezna.').email('Unesite ispravnu e-mail adresu.'),
+  phone: z.string().min(6, 'Broj telefona je obavezan.'),
+  checkIn: z.string().min(1, 'Datum dolaska je obavezan.'),
+  checkOut: z.string().min(1, 'Datum odlaska je obavezan.'),
+  guests: z.coerce.number().min(1, 'Potreban je najmanje 1 gost.').max(20),
   message: z.string().optional(),
 })
 
@@ -29,21 +29,21 @@ export async function submitBookingInquiry(
 ): Promise<BookingFormState> {
 
   const raw = {
-    apartmentId: formData.get('apartmentId') as string,
-    name: formData.get('name') as string,
-    email: formData.get('email') as string,
-    phone: formData.get('phone') as string,
-    checkIn: formData.get('checkIn') as string,
-    checkOut: formData.get('checkOut') as string,
-    guests: formData.get('guests') as string,
-    message: (formData.get('message') as string) || undefined,
+    apartmentId: String(formData.get('apartmentId') ?? ''),
+    name: String(formData.get('name') ?? ''),
+    email: String(formData.get('email') ?? ''),
+    phone: String(formData.get('phone') ?? ''),
+    checkIn: String(formData.get('checkIn') ?? ''),
+    checkOut: String(formData.get('checkOut') ?? ''),
+    guests: String(formData.get('guests') ?? ''),
+    message: String(formData.get('message') ?? '') || undefined,
   }
 
   const validated = bookingSchema.safeParse(raw)
   if (!validated.success) {
     return {
       success: false,
-      message: 'Please check the form for errors.',
+      message: 'Provjerite unesene podatke.',
       errors: validated.error.flatten().fieldErrors,
     }
   }
@@ -70,14 +70,14 @@ export async function submitBookingInquiry(
     })
 
     if (!apartment) {
-      return { success: false, message: 'Apartment not found.' }
+      return { success: false, message: 'Apartman nije pronađen.' }
     }
 
     if (guests > apartment.maxGuests) {
       return {
         success: false,
-        message: `This apartment accommodates a maximum of ${apartment.maxGuests} guests.`,
-        errors: { guests: [`Maximum ${apartment.maxGuests} guests allowed.`] },
+        message: `U ovom apartmanu može boraviti najviše ${apartment.maxGuests} gostiju.`,
+        errors: { guests: [`Najveći dozvoljeni broj gostiju je ${apartment.maxGuests}.`] },
       }
     }
 
@@ -88,13 +88,16 @@ export async function submitBookingInquiry(
     if (!avail.available) {
       return {
         success: false,
-        message: 'Selected dates are not available.',
+        message: 'Odabrani datumi nisu dostupni.',
         errors: {
-          checkIn: ['These dates overlap with an existing booking.'],
-          checkOut: ['Please select different dates.'],
+          checkIn: ['Ovi datumi se preklapaju s postojećom rezervacijom.'],
+          checkOut: ['Odaberite druge datume.'],
         },
       }
     }
+
+    const settings = await prisma.siteSettings.findFirst({ select: { bookingEmail: true } })
+    const bookingEmail = settings?.bookingEmail || process.env.BOOKING_EMAIL
 
     // Inquiry only — booking is created when admin confirms / converts
     await prisma.bookingInquiry.create({
@@ -113,7 +116,7 @@ export async function submitBookingInquiry(
 
     revalidatePath('/admin/inquiries')
 
-    sendBookingNotification({
+    const emailData = {
       apartmentName: apartment.name,
       checkIn: checkInDate,
       checkOut: checkOutDate,
@@ -122,28 +125,25 @@ export async function submitBookingInquiry(
       email,
       phone,
       message: message || null,
-    }).catch((err) => console.error('Background email error:', err))
+    }
+    const [adminEmail, guestEmail] = await Promise.all([
+      sendBookingNotification(emailData, bookingEmail),
+      sendBookingRequestReceived(emailData, bookingEmail),
+    ])
 
-    sendGuestConfirmation({
-      apartmentName: apartment.name,
-      checkIn: checkInDate,
-      checkOut: checkOutDate,
-      guests,
-      name,
-      email,
-      phone,
-      message: message || null,
-    }).catch((err) => console.error('Guest confirmation email error:', err))
+    const emailWarning = !adminEmail.sent || !guestEmail.sent
+      ? ' Zahtjev je sačuvan, ali slanje e-maila nije uspjelo. Provjerite konfiguraciju e-maila ili nas kontaktirajte putem WhatsAppa.'
+      : ''
 
     return {
       success: true,
-      message: `Thank you ${name}. Your booking request has been sent. We will contact you shortly.`,
+      message: `Hvala, ${name}. Vaš zahtjev za rezervaciju je zaprimljen.${emailWarning}`,
     }
   } catch (error) {
     console.error('Booking error:', error)
     return {
       success: false,
-      message: 'Something went wrong. Please try again or contact us via WhatsApp.',
+      message: 'Došlo je do greške. Pokušajte ponovo ili nas kontaktirajte putem WhatsAppa.',
     }
   }
 }

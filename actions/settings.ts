@@ -7,12 +7,12 @@ import { revalidatePath } from 'next/cache'
 import { verifyAdminSession } from '@/lib/auth'
 
 const settingsSchema = z.object({
-  siteName:       z.string().min(1, 'Site name required'),
-  contactEmail:   z.string().email('Valid email required'),
-  phoneNumber:    z.string().min(5, 'Phone required'),
-  whatsappNumber: z.string().min(5, 'WhatsApp number required'),
-  viberNumber:    z.string().min(5, 'Viber number required'),
-  bookingEmail:   z.string().email('Valid booking email required'),
+  siteName:       z.string().min(1, 'Naziv stranice je obavezan.'),
+  contactEmail:   z.string().email('Unesite ispravnu e-mail adresu.'),
+  phoneNumber:    z.string().min(5, 'Broj telefona je obavezan.'),
+  whatsappNumber: z.string().min(5, 'WhatsApp broj je obavezan.'),
+  viberNumber:    z.string().min(5, 'Viber broj je obavezan.'),
+  bookingEmail:   z.string().email('Unesite ispravnu adresu za obavijesti.'),
   currency:       z.string().min(1).default('EUR'),
 })
 
@@ -24,7 +24,7 @@ export async function saveSettings(_prev: SettingsState, formData: FormData): Pr
   const validated = settingsSchema.safeParse(raw)
 
   if (!validated.success) {
-    return { success: false, message: 'Please fix the errors below.', errors: validated.error.flatten().fieldErrors }
+    return { success: false, message: 'Ispravite unesene podatke.', errors: validated.error.flatten().fieldErrors }
   }
 
   // Upsert -- create if not exists, update if exists
@@ -37,5 +37,5 @@ export async function saveSettings(_prev: SettingsState, formData: FormData): Pr
   }
 
   revalidatePath('/admin/settings')
-  return { success: true, message: 'Settings saved successfully.' }
+  return { success: true, message: 'Postavke su uspješno sačuvane.' }
 }

@@ -15,15 +15,15 @@ export function DeleteApartmentButton({ id, name }: Props) {
   const [error, setError] = useState<string | null>(null)
 
   const handleDelete = () => {
-    if (!confirm(`Delete "${name}"? This cannot be undone.`)) return
+    if (!confirm(`Obrisati apartman "${name}"? Ovu radnju nije moguće poništiti.`)) return
 
     setError(null)
     startTransition(async () => {
       try {
         await deleteApartmentAction(id)
-        // Server action calls revalidatePath -- list will refresh automatically
       } catch (e) {
-        setError('Delete failed. Please try again.')
+        console.error('Apartment deletion failed:', e)
+        setError('Brisanje nije uspjelo. Pokušajte ponovo.')
       }
     })
   }
@@ -34,7 +34,7 @@ export function DeleteApartmentButton({ id, name }: Props) {
         onClick={handleDelete}
         disabled={isPending}
         className="p-1.5 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
-        title="Delete apartment"
+        title="Obriši apartman"
       >
         {isPending
           ? <Loader2 size={15} className="animate-spin text-red-400" />

@@ -11,11 +11,11 @@ export type LoginState = {
 }
 
 export async function loginAction(_prev: LoginState, formData: FormData): Promise<LoginState> {
-  const username = formData.get('username') as string
-  const password = formData.get('password') as string
+  const username = String(formData.get('username') ?? '')
+  const password = String(formData.get('password') ?? '')
 
   if (!password) {
-    return { success: false, message: 'Password is required.' }
+    return { success: false, message: 'Lozinka je obavezna.' }
   }
 
   const expectedUsername = process.env.ADMIN_USERNAME || 'admin'
@@ -24,12 +24,12 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   if (!expectedPassword) {
     return {
       success: false,
-      message: 'Server configuration error: ADMIN_PASSWORD is not set in environment.',
+      message: 'Greška u konfiguraciji servera: ADMIN_PASSWORD nije postavljen.',
     }
   }
 
   if (username !== expectedUsername || password !== expectedPassword) {
-    return { success: false, message: 'Invalid username or password.' }
+    return { success: false, message: 'Neispravno korisničko ime ili lozinka.' }
   }
 
   const duration = 7 * 24 * 60 * 60 * 1000 // 7 days
@@ -48,7 +48,7 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
   })
 
-  return { success: true, message: 'Logged in successfully.' }
+  return { success: true, message: 'Uspješna prijava.' }
 }
 
 export async function logoutAction(): Promise<void> {

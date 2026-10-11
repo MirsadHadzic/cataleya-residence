@@ -25,35 +25,35 @@ export function SeasonPriceForm({ apartments }: { apartments: Apt[] }) {
         </div>
       )}
       <div>
-        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Apartment</label>
+        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Apartman</label>
         <select name="apartmentId" className={inp}>
           {apartments.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
       </div>
       <div>
-        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Label</label>
-        <input name="label" type="text" placeholder="High Season, Christmas, etc." required className={inp} />
+        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Naziv sezone</label>
+        <input name="label" type="text" placeholder="Visoka sezona, Nova godina..." required className={inp} />
         {err.label && <p className="text-red-500 text-xs mt-1">{err.label[0]}</p>}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Start Date</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Datum početka</label>
           <input name="startDate" type="date" required className={inp} />
         </div>
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">End Date</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Datum završetka</label>
           <input name="endDate" type="date" required className={inp} />
         </div>
       </div>
       <div>
-        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Price / Night (EUR)</label>
+        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Cijena / noć (EUR)</label>
         <input name="pricePerNight" type="number" step="0.01" min="1" required placeholder="350" className={inp} />
         {err.pricePerNight && <p className="text-red-500 text-xs mt-1">{err.pricePerNight[0]}</p>}
       </div>
       <button type="submit" disabled={pending}
         className="flex items-center gap-2 px-5 py-2.5 bg-charcoal text-white text-sm font-sans hover:bg-charcoal-light transition-colors disabled:opacity-60">
         {pending && <Loader2 size={13} className="animate-spin" />}
-        Create Season
+        Kreiraj sezonu
       </button>
     </form>
   )

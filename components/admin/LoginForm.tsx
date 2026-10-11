@@ -28,10 +28,9 @@ export function LoginForm() {
         </div>
       )}
 
-      {/* Username field */}
       <div className="space-y-2">
         <label htmlFor="login-username" className="block text-[10px] font-sans font-medium tracking-[0.2em] uppercase text-gold">
-          Username
+          Korisničko ime
         </label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
@@ -44,15 +43,14 @@ export function LoginForm() {
             required
             defaultValue="admin"
             className="w-full bg-white/5 border border-white/10 hover:border-gold/30 focus:border-gold px-10 py-3.5 text-sm font-sans font-light text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
-            placeholder="Username"
+            placeholder="Korisničko ime"
           />
         </div>
       </div>
 
-      {/* Password field */}
       <div className="space-y-2">
         <label htmlFor="login-password" className="block text-[10px] font-sans font-medium tracking-[0.2em] uppercase text-gold">
-          Password
+          Lozinka
         </label>
         <div className="relative">
           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40">
@@ -64,12 +62,11 @@ export function LoginForm() {
             type="password"
             required
             className="w-full bg-white/5 border border-white/10 hover:border-gold/30 focus:border-gold px-10 py-3.5 text-sm font-sans font-light text-white placeholder:text-white/20 focus:outline-none transition-all duration-300"
-            placeholder="Password"
+            placeholder="Lozinka"
           />
         </div>
       </div>
 
-      {/* Submit button */}
       <button
         id="login-submit-button"
         type="submit"
@@ -79,10 +76,10 @@ export function LoginForm() {
         {pending ? (
           <>
             <Loader2 size={16} className="animate-spin text-white" />
-            Authenticating...
+            Prijava u toku...
           </>
         ) : (
-          'Sign In'
+          'Prijavi se'
         )}
       </button>
     </form>

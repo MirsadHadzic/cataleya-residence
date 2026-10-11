@@ -7,17 +7,18 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { verifyAdminSession } from '@/lib/auth'
 import { checkAvailability, parseDateInput, validateStayDates } from '@/lib/availability'
+import { sendBookingConfirmation } from '@/lib/email'
 
 // Feature 1: Manual booking
 
 const manualBookingSchema = z.object({
-  apartmentId:   z.string().min(1),
-  guestName:     z.string().min(2, 'Name is required'),
-  guestEmail:    z.string().email('Valid email required'),
+  apartmentId:   z.string().min(1, 'Odaberite apartman.'),
+  guestName:     z.string().min(2, 'Ime gosta je obavezno.'),
+  guestEmail:    z.string().email('Unesite ispravnu e-mail adresu.'),
   guestPhone:    z.string().optional(),
-  checkIn:       z.string().min(1, 'Check-in required'),
-  checkOut:      z.string().min(1, 'Check-out required'),
-  guests:        z.coerce.number().min(1).max(20),
+  checkIn:       z.string().min(1, 'Datum dolaska je obavezan.'),
+  checkOut:      z.string().min(1, 'Datum odlaska je obavezan.'),
+  guests:        z.coerce.number().min(1, 'Potreban je najmanje 1 gost.').max(20, 'Najveći dozvoljeni broj gostiju je 20.'),
   pricePerNight: z.coerce.number().min(0),
   totalPrice:    z.coerce.number().min(0),
   notes:         z.string().optional(),
@@ -41,7 +42,7 @@ export async function createManualBooking(
   if (!validated.success) {
     return {
       success: false,
-      message: 'Please fix the errors below.',
+      message: 'Ispravite unesene podatke.',
       errors: validated.error.flatten().fieldErrors,
     }
   }
@@ -56,13 +57,33 @@ export async function createManualBooking(
 
   const dateCheck = validateStayDates(checkInDate, checkOutDate)
   if (!dateCheck.ok) {
-    return { success: false, message: dateCheck.message }
+    return {
+      success: false,
+      message: dateCheck.message.includes('past')
+        ? 'Datum dolaska ne može biti u prošlosti.'
+        : 'Datum odlaska mora biti nakon datuma dolaska.',
+    }
   }
 
   const avail = await checkAvailability(apartmentId, checkInDate, checkOutDate)
   if (!avail.available) {
-    return { success: false, message: avail.reason ?? 'Dates not available.' }
+    return {
+      success: false,
+      message: avail.reason === 'These dates are blocked.'
+        ? 'Odabrani datumi su blokirani.'
+        : 'Odabrani datumi se preklapaju s postojećom rezervacijom.',
+    }
   }
+
+  const apartment = await prisma.apartment.findUnique({
+    where: { id: apartmentId },
+    select: { name: true, maxGuests: true },
+  })
+  if (!apartment) return { success: false, message: 'Odabrani apartman nije pronađen.' }
+  if (guests > apartment.maxGuests) {
+    return { success: false, message: `U ovom apartmanu može boraviti najviše ${apartment.maxGuests} gostiju.` }
+  }
+  const settings = await prisma.siteSettings.findFirst({ select: { bookingEmail: true } })
 
   await prisma.booking.create({
     data: {
@@ -81,16 +102,27 @@ export async function createManualBooking(
     },
   })
 
+  const delivery = await sendBookingConfirmation({
+    apartmentName: apartment.name,
+    checkIn: checkInDate,
+    checkOut: checkOutDate,
+    guests,
+    name: guestName,
+    email: guestEmail,
+    phone: guestPhone || '',
+    message: notes || null,
+  }, settings?.bookingEmail || process.env.BOOKING_EMAIL)
+
   revalidatePath('/admin/bookings')
-  redirect('/admin/bookings')
+  redirect(delivery.sent ? '/admin/bookings' : '/admin/bookings?email=failed')
 }
 
 // Feature 2: Block dates
 
 const blockDatesSchema = z.object({
-  apartmentId: z.string().min(1),
-  startDate:   z.string().min(1, 'Start date required'),
-  endDate:     z.string().min(1, 'End date required'),
+  apartmentId: z.string().min(1, 'Odaberite apartman.'),
+  startDate:   z.string().min(1, 'Datum početka je obavezan.'),
+  endDate:     z.string().min(1, 'Datum završetka je obavezan.'),
   reason:      z.string().optional(),
 })
 
@@ -112,7 +144,7 @@ export async function blockDates(
   if (!validated.success) {
     return {
       success: false,
-      message: 'Please fix the errors below.',
+      message: 'Ispravite unesene podatke.',
       errors: validated.error.flatten().fieldErrors,
     }
   }
@@ -122,7 +154,7 @@ export async function blockDates(
   const end   = new Date(endDate)
 
   if (start >= end) {
-    return { success: false, message: 'End date must be after start date.' }
+    return { success: false, message: 'Datum završetka mora biti nakon datuma početka.' }
   }
 
   await prisma.blockedDate.create({
@@ -135,7 +167,7 @@ export async function blockDates(
   })
 
   revalidatePath('/admin/bookings')
-  return { success: true, message: 'Dates blocked successfully.' }
+  return { success: true, message: 'Datumi su uspješno blokirani.' }
 }
 
 export async function deleteBlockedDate(id: string): Promise<void> {
@@ -147,11 +179,11 @@ export async function deleteBlockedDate(id: string): Promise<void> {
 // Feature 3: Season pricing
 
 const seasonSchema = z.object({
-  apartmentId:   z.string().min(1),
-  label:         z.string().min(1, 'Label is required'),
-  startDate:     z.string().min(1),
-  endDate:       z.string().min(1),
-  pricePerNight: z.coerce.number().min(1, 'Price must be at least 1'),
+  apartmentId:   z.string().min(1, 'Odaberite apartman.'),
+  label:         z.string().min(1, 'Naziv je obavezan.'),
+  startDate:     z.string().min(1, 'Datum početka je obavezan.'),
+  endDate:       z.string().min(1, 'Datum završetka je obavezan.'),
+  pricePerNight: z.coerce.number().min(1, 'Cijena mora biti najmanje 1.'),
 })
 
 export type SeasonState = {
@@ -172,7 +204,7 @@ export async function createSeasonPrice(
   if (!validated.success) {
     return {
       success: false,
-      message: 'Please fix the errors below.',
+      message: 'Ispravite unesene podatke.',
       errors: validated.error.flatten().fieldErrors,
     }
   }
@@ -182,7 +214,7 @@ export async function createSeasonPrice(
   const end   = new Date(endDate)
 
   if (start >= end) {
-    return { success: false, message: 'End date must be after start date.' }
+    return { success: false, message: 'Datum završetka mora biti nakon datuma početka.' }
   }
 
   await prisma.seasonPrice.create({
@@ -190,7 +222,7 @@ export async function createSeasonPrice(
   })
 
   revalidatePath('/admin/pricing')
-  return { success: true, message: 'Season created successfully.' }
+  return { success: true, message: 'Sezona je uspješno kreirana.' }
 }
 
 export async function updateSeasonPrice(
@@ -206,12 +238,16 @@ export async function updateSeasonPrice(
   if (!validated.success) {
     return {
       success: false,
-      message: 'Please fix the errors below.',
+      message: 'Ispravite unesene podatke.',
       errors: validated.error.flatten().fieldErrors,
     }
   }
 
   const { apartmentId, label, startDate, endDate, pricePerNight } = validated.data
+
+  if (new Date(startDate) >= new Date(endDate)) {
+    return { success: false, message: 'Datum završetka mora biti nakon datuma početka.' }
+  }
 
   await prisma.seasonPrice.update({
     where: { id },
@@ -224,7 +260,7 @@ export async function updateSeasonPrice(
   })
 
   revalidatePath('/admin/pricing')
-  return { success: true, message: 'Season updated.' }
+  return { success: true, message: 'Sezona je ažurirana.' }
 }
 
 export async function deleteSeasonPrice(id: string): Promise<void> {
@@ -257,13 +293,76 @@ export async function resolvePrice(
 }
 
 // Confirm / cancel booking -- used by BookingStatusButtons
-export async function confirmBooking(id: string): Promise<void> {
+export async function confirmBooking(id: string): Promise<{ message: string }> {
   await verifyAdminSession()
-  await prisma.booking.update({
+  const booking = await prisma.booking.findUnique({
     where: { id },
-    data: { status: 'CONFIRMED' },
+    include: { apartment: { select: { name: true } } },
   })
+  if (!booking) return { message: 'Rezervacija nije pronađena.' }
+  if (booking.status === 'CONFIRMED') return { message: 'Rezervacija je već potvrđena.' }
+  if (booking.status === 'CANCELLED') return { message: 'Otkazana rezervacija se ne može potvrditi.' }
+
+  const availability = await checkAvailability(booking.apartmentId, booking.checkIn, booking.checkOut, {
+    includePending: false,
+  })
+  if (!availability.available) {
+    return { message: availability.reason ?? 'Datumi su već rezervisani.' }
+  }
+
+  const settings = await prisma.siteSettings.findFirst({ select: { bookingEmail: true } })
+  const inquiry = await prisma.bookingInquiry.findFirst({
+    where: {
+      apartmentId: booking.apartmentId,
+      checkIn: booking.checkIn,
+      checkOut: booking.checkOut,
+      ...(booking.guestEmail ? { email: booking.guestEmail } : {}),
+    },
+    orderBy: { createdAt: 'desc' },
+  })
+
+  await prisma.$transaction([
+    prisma.booking.update({
+      where: { id },
+      data: {
+        status: 'CONFIRMED',
+        ...(booking.guestName || inquiry?.name ? {} : { guestName: inquiry?.name }),
+        ...(booking.guestEmail || inquiry?.email ? {} : { guestEmail: inquiry?.email }),
+        ...(booking.guestPhone || inquiry?.phone ? {} : { guestPhone: inquiry?.phone }),
+      },
+    }),
+    ...(inquiry ? [
+      prisma.bookingInquiry.update({ where: { id: inquiry.id }, data: { status: 'CONFIRMED' } }),
+    ] : []),
+  ])
+
+  const email = booking.guestEmail || inquiry?.email
+  if (!email) {
+    console.error(`Booking ${id} confirmed without a guest email address.`)
+    revalidatePath('/admin/bookings')
+    revalidatePath('/admin')
+    revalidatePath('/apartments')
+    return { message: 'Rezervacija je potvrđena, ali gost nema unesenu e-mail adresu.' }
+  }
+  const delivery = await sendBookingConfirmation({
+    apartmentName: booking.apartment.name,
+    checkIn: booking.checkIn,
+    checkOut: booking.checkOut,
+    guests: booking.guests,
+    name: booking.guestName || inquiry?.name || email,
+    email,
+    phone: booking.guestPhone || inquiry?.phone || '',
+  }, settings?.bookingEmail || process.env.BOOKING_EMAIL)
+
   revalidatePath('/admin/bookings')
+  revalidatePath('/admin/inquiries')
+  revalidatePath('/admin')
+  revalidatePath('/apartments')
+  return {
+    message: delivery.sent
+      ? 'Rezervacija je potvrđena i e-mail je poslan gostu.'
+      : `Rezervacija je potvrđena, ali e-mail nije poslan: ${delivery.error}`,
+  }
 }
 
 export async function cancelBooking(id: string): Promise<void> {
@@ -273,4 +372,6 @@ export async function cancelBooking(id: string): Promise<void> {
     data: { status: 'CANCELLED' },
   })
   revalidatePath('/admin/bookings')
+  revalidatePath('/admin')
+  revalidatePath('/apartments')
 }

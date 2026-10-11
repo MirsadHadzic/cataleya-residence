@@ -20,8 +20,8 @@ export default async function AdminSettingsPage() {
   return (
     <div className="max-w-2xl space-y-6">
       <div>
-        <h2 className="font-serif text-2xl text-charcoal mb-1">Settings</h2>
-        <p className="text-gray-500 text-sm font-sans font-light">Global site configuration.</p>
+        <h2 className="font-serif text-2xl text-charcoal mb-1">Postavke</h2>
+        <p className="text-gray-500 text-sm font-sans font-light">Opće postavke stranice.</p>
       </div>
       <SettingsForm defaults={defaults} />
     </div>

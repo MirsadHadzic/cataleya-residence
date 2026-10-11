@@ -6,20 +6,20 @@ import { InquiryActionButtons } from '@/components/admin/InquiryActionButtons'
 import { MessageSquare } from 'lucide-react'
 
 function fmtDate(d: Date) {
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString('bs-BA', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 function fmtEur(n: number) {
-  return new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(n)
+  return new Intl.NumberFormat('bs-BA', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(n)
 }
 function getNights(a: Date, b: Date) {
   return Math.round((b.getTime() - a.getTime()) / 86400000)
 }
 
 const STATUS_LABEL: Record<string, { bg: string; text: string; label: string }> = {
-  PENDING:   { bg: 'bg-amber-50 border border-amber-200',  text: 'text-amber-700',  label: 'New' },
-  CONTACTED: { bg: 'bg-blue-50 border border-blue-200',    text: 'text-blue-700',   label: 'Contacted' },
-  CONFIRMED: { bg: 'bg-green-50 border border-green-200',  text: 'text-green-700',  label: 'Converted' },
-  CANCELLED: { bg: 'bg-gray-100 border border-gray-200',   text: 'text-gray-500',   label: 'Closed' },
+  PENDING:   { bg: 'bg-amber-50 border border-amber-200',  text: 'text-amber-700',  label: 'Novi' },
+  CONTACTED: { bg: 'bg-blue-50 border border-blue-200',    text: 'text-blue-700',   label: 'Kontaktiran' },
+  CONFIRMED: { bg: 'bg-green-50 border border-green-200',  text: 'text-green-700',  label: 'Potvrđen' },
+  CANCELLED: { bg: 'bg-gray-100 border border-gray-200',   text: 'text-gray-500',   label: 'Zatvoren' },
 }
 
 export default async function AdminInquiriesPage() {
@@ -39,17 +39,17 @@ export default async function AdminInquiriesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="font-serif text-2xl text-charcoal mb-1">Booking Inquiries</h2>
-        <p className="text-gray-500 text-sm font-sans font-light">{counts.total} total</p>
+        <h2 className="font-serif text-2xl text-charcoal mb-1">Zahtjevi za rezervaciju</h2>
+        <p className="text-gray-500 text-sm font-sans font-light">{counts.total} ukupno</p>
       </div>
 
       {/* Summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'New', value: counts.new, color: 'text-amber-600' },
-          { label: 'Contacted', value: counts.contacted, color: 'text-blue-600' },
-          { label: 'Converted', value: counts.converted, color: 'text-green-600' },
-          { label: 'Closed', value: counts.closed, color: 'text-gray-500' },
+          { label: 'Novi', value: counts.new, color: 'text-amber-600' },
+          { label: 'Kontaktirani', value: counts.contacted, color: 'text-blue-600' },
+          { label: 'Potvrđeni', value: counts.converted, color: 'text-green-600' },
+          { label: 'Zatvoreni', value: counts.closed, color: 'text-gray-500' },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-white border border-gray-200 p-5">
             <div className={`font-serif text-3xl mb-1 ${color}`}>{value}</div>
@@ -62,7 +62,7 @@ export default async function AdminInquiriesPage() {
       {inquiries.length === 0 ? (
         <div className="bg-white border border-gray-200 p-16 text-center">
           <MessageSquare size={28} className="text-gold mx-auto mb-3" strokeWidth={1.5} />
-          <p className="text-gray-400 text-sm font-sans">No inquiries yet.</p>
+          <p className="text-gray-400 text-sm font-sans">Još nema zahtjeva.</p>
         </div>
       ) : (
         <>
@@ -70,7 +70,7 @@ export default async function AdminInquiriesPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  {['Guest', 'Apartment', 'Dates', 'Est. Total', 'Message', 'Status', 'Actions'].map(col => (
+                  {['Gost', 'Apartman', 'Datumi', 'Procijenjeni iznos', 'Poruka', 'Status', 'Radnje'].map(col => (
                     <th key={col} className="text-left px-5 py-3 text-xs font-sans text-gray-400 uppercase tracking-widest whitespace-nowrap">{col}</th>
                   ))}
                 </tr>
@@ -91,14 +91,14 @@ export default async function AdminInquiriesPage() {
                       <td className="px-5 py-4 text-sm font-sans text-charcoal">{inq.apartment.name}</td>
                       <td className="px-5 py-4">
                         <div className="text-sm font-sans text-charcoal">{fmtDate(inq.checkIn)}</div>
-                        <div className="text-xs text-gray-400">to {fmtDate(inq.checkOut)}</div>
-                        <div className="text-xs text-taupe">{nights}n, {inq.guests}g</div>
+                        <div className="text-xs text-gray-400">do {fmtDate(inq.checkOut)}</div>
+                        <div className="text-xs text-taupe">{nights} noćenja · {inq.guests} gostiju</div>
                       </td>
                       <td className="px-5 py-4 font-serif text-sm text-charcoal">{fmtEur(total)}</td>
                       <td className="px-5 py-4 max-w-xs">
                         {inq.message ? (
-                          <p className="text-xs text-gray-500 font-light italic line-clamp-2">"{inq.message}"</p>
-                        ) : <span className="text-xs text-gray-300">--</span>}
+                          <p className="text-xs text-gray-500 font-light italic line-clamp-2">&ldquo;{inq.message}&rdquo;</p>
+                        ) : <span className="text-xs text-gray-300">—</span>}
                       </td>
                       <td className="px-5 py-4">
                         <span className={`inline-flex px-2.5 py-1 text-xs font-sans ${s.bg} ${s.text}`}>{s.label}</span>
@@ -135,9 +135,9 @@ export default async function AdminInquiriesPage() {
                     <span className={`inline-flex px-2.5 py-1 text-xs font-sans flex-shrink-0 ${s.bg} ${s.text}`}>{s.label}</span>
                   </div>
                   <div className="text-xs text-gray-500 font-sans">
-                    {fmtDate(inq.checkIn)} to {fmtDate(inq.checkOut)} &bull; {nights}n &bull; {fmtEur(total)}
+                    {fmtDate(inq.checkIn)} do {fmtDate(inq.checkOut)} &bull; {nights} noćenja &bull; {fmtEur(total)}
                   </div>
-                  {inq.message && <p className="text-xs text-gray-400 italic line-clamp-2">"{inq.message}"</p>}
+                  {inq.message && <p className="text-xs text-gray-400 italic line-clamp-2">&ldquo;{inq.message}&rdquo;</p>}
                   <InquiryActionButtons
                     inquiryId={inq.id}
                     currentStatus={inq.status}

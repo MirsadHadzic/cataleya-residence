@@ -5,8 +5,8 @@ import Link from 'next/link'
 import { ArrowLeft } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Admin Sign In | Cataleya Residence',
-  description: 'Authorized administrative sign-in portal for Cataleya Residence.',
+  title: 'Prijava administratora | Cataleya Residence',
+  description: 'Prijava u administrativni panel Cataleya Residence.',
 }
 
 export default function AdminLoginPage() {
@@ -22,7 +22,7 @@ export default function AdminLoginPage() {
           className="inline-flex items-center gap-2 text-xs uppercase tracking-widest text-white/40 hover:text-gold transition-colors duration-300"
         >
           <ArrowLeft size={14} />
-          Back to website
+          Povratak na stranicu
         </Link>
       </div>
 
@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
             Cataleya Residence
           </div>
           <h1 className="font-serif text-3xl text-white font-light">
-            Portal Access
+            Administrativni panel
           </h1>
           <div className="w-12 h-px bg-gold/30 mx-auto mt-4" />
         </div>
@@ -48,7 +48,7 @@ export default function AdminLoginPage() {
 
       {/* Footer */}
       <div className="mt-8 text-center text-[10px] text-white/20 tracking-wider uppercase z-10">
-        &copy; {new Date().getFullYear()} Cataleya Residence. All Rights Reserved.
+        &copy; {new Date().getFullYear()} Cataleya Residence. Sva prava zadržana.
       </div>
     </div>
   )

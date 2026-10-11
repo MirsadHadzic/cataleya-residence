@@ -9,10 +9,10 @@ export function DeleteBlockedDateButton({ id }: { id: string }) {
   const [pending, start] = useTransition()
   return (
     <button
-      onClick={() => { if (!confirm('Remove this blocked period?')) return; start(() => deleteBlockedDate(id)) }}
+      onClick={() => { if (!confirm('Ukloniti ovaj blokirani period?')) return; start(() => deleteBlockedDate(id)) }}
       disabled={pending}
       className="text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
-      title="Delete"
+      title="Obriši"
     >
       {pending ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
     </button>

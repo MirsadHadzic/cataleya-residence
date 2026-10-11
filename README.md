@@ -29,15 +29,20 @@ Open http://localhost:3000 — admin panel at `/admin/login`.
 3. Add environment variables (same as `.env.example`):
    - `DATABASE_URL` — use [Supabase](https://supabase.com), [Neon](https://neon.tech), or Vercel Postgres
    - `RESEND_API_KEY`
+   - `RESEND_FROM_EMAIL` — a sender address verified with Resend
    - `BOOKING_EMAIL`
    - `ADMIN_PASSWORD`
    - `SESSION_SECRET`
 4. Build command: `prisma generate && next build` (or use the default `npm run build` with postinstall).
-5. After first deploy, run migrations against production:
+5. Initialize an empty production database once:
    ```bash
    npx prisma db push
-   npm run db:seed
    ```
+   For an existing Cataleya database, update the apartment names, images, and nightly rates without deleting booking data:
+   ```bash
+   npm run db:update-apartments
+   ```
+   Do not run `db:seed` against a live database; it deletes existing reservations.
 
 ## Git LFS
 

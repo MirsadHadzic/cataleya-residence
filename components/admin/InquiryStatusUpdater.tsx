@@ -5,17 +5,17 @@ import { useTransition } from 'react'
 import { updateInquiryStatus } from '@/actions/inquiries'
 
 type Status = 'PENDING' | 'CONTACTED' | 'CONFIRMED' | 'CANCELLED'
+type EditableStatus = Exclude<Status, 'CONFIRMED'>
 
 interface Props {
   inquiryId: string
   currentStatus: Status
 }
 
-const statusOptions: { value: Status; label: string }[] = [
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'CONTACTED', label: 'Contacted' },
-  { value: 'CONFIRMED', label: 'Confirmed' },
-  { value: 'CANCELLED', label: 'Cancelled' },
+const statusOptions: { value: EditableStatus; label: string }[] = [
+  { value: 'PENDING', label: 'Na čekanju' },
+  { value: 'CONTACTED', label: 'Kontaktiran' },
+  { value: 'CANCELLED', label: 'Otkazan' },
 ]
 
 const statusColors: Record<Status, string> = {
@@ -29,7 +29,7 @@ export function InquiryStatusUpdater({ inquiryId, currentStatus }: Props) {
   const [isPending, startTransition] = useTransition()
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const newStatus = e.target.value as Status
+    const newStatus = e.target.value as EditableStatus
     startTransition(() => {
       updateInquiryStatus(inquiryId, newStatus)
     })
@@ -37,11 +37,12 @@ export function InquiryStatusUpdater({ inquiryId, currentStatus }: Props) {
 
   return (
     <select
-      defaultValue={currentStatus}
+      value={currentStatus}
       onChange={handleChange}
       disabled={isPending}
       className={`w-full px-3 py-2 text-xs font-sans border ${statusColors[currentStatus]} cursor-pointer disabled:opacity-60`}
     >
+      {currentStatus === 'CONFIRMED' && <option value="CONFIRMED" disabled>Potvrđen</option>}
       {statusOptions.map(({ value, label }) => (
         <option key={value} value={value}>{label}</option>
       ))}

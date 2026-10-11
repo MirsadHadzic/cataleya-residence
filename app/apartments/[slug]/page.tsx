@@ -190,28 +190,30 @@ export default async function ApartmentDetailPage({ params }: Props) {
             </div>
 
             {/* Amenities */}
-            <div>
-              <h2 className="font-serif text-2xl text-charcoal mb-6">
-                Amenities &amp; Features
-              </h2>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
-                {apartment.amenities.map((amenity) => (
-                  <div
-                    key={amenity}
-                    className="flex items-center gap-3 py-3 border-b border-champagne/70"
-                  >
-                    <Check
-                      size={12}
-                      className="text-gold flex-shrink-0"
-                      strokeWidth={2.5}
-                    />
-                    <span className="text-charcoal-muted text-sm font-sans font-light">
-                      {amenity}
-                    </span>
-                  </div>
-                ))}
+            {apartment.amenities.length > 0 && (
+              <div>
+                <h2 className="font-serif text-2xl text-charcoal mb-6">
+                  Amenities &amp; Features
+                </h2>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-0">
+                  {apartment.amenities.map((amenity) => (
+                    <div
+                      key={amenity}
+                      className="flex items-center gap-3 py-3 border-b border-champagne/70"
+                    >
+                      <Check
+                        size={12}
+                        className="text-gold flex-shrink-0"
+                        strokeWidth={2.5}
+                      />
+                      <span className="text-charcoal-muted text-sm font-sans font-light">
+                        {amenity}
+                      </span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Availability calendar */}
             <AvailabilityCalendar bookedRanges={bookedRanges} />

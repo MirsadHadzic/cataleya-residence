@@ -7,10 +7,10 @@ import { DeleteSeasonButton } from '@/components/admin/DeleteSeasonButton'
 import { Tag } from 'lucide-react'
 
 function fmtDate(d: Date) {
-  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  return d.toLocaleDateString('bs-BA', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 function fmtEur(n: number) {
-  return new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(n)
+  return new Intl.NumberFormat('bs-BA', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(n)
 }
 
 export default async function AdminPricingPage() {
@@ -22,27 +22,27 @@ export default async function AdminPricingPage() {
   return (
     <div className="space-y-8 max-w-4xl">
       <div>
-        <h2 className="font-serif text-2xl text-charcoal mb-1">Seasonal Pricing</h2>
+        <h2 className="font-serif text-2xl text-charcoal mb-1">Sezonske cijene</h2>
         <p className="text-gray-500 text-sm font-sans font-light">
-          Override base apartment prices for specific date ranges.
+          Promijenite osnovne cijene apartmana za odabrane datume.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Create form */}
         <div className="bg-white border border-gray-200 p-6">
-          <h3 className="font-serif text-lg text-charcoal mb-5">Add Season</h3>
+          <h3 className="font-serif text-lg text-charcoal mb-5">Dodaj sezonu</h3>
           <SeasonPriceForm apartments={apartments} />
         </div>
 
         {/* Base prices reference */}
         <div className="bg-white border border-gray-200 p-6">
-          <h3 className="font-serif text-lg text-charcoal mb-5">Base Prices</h3>
+          <h3 className="font-serif text-lg text-charcoal mb-5">Osnovne cijene</h3>
           <div className="space-y-3">
             {apartments.map((a) => (
               <div key={a.id} className="flex items-center justify-between py-2 border-b border-gray-100">
                 <span className="text-sm font-sans text-charcoal">{a.name}</span>
-                <span className="font-serif text-sm text-gold">{fmtEur(a.pricePerNight)} / night</span>
+                <span className="font-serif text-sm text-gold">{fmtEur(a.pricePerNight)} / noć</span>
               </div>
             ))}
           </div>
@@ -53,14 +53,15 @@ export default async function AdminPricingPage() {
       {seasons.length === 0 ? (
         <div className="bg-white border border-gray-200 p-12 text-center">
           <Tag size={28} className="text-gold mx-auto mb-3" strokeWidth={1.5} />
-          <p className="text-gray-400 text-sm font-sans">No seasons defined yet.</p>
+          <p className="text-gray-400 text-sm font-sans">Nema definisanih sezona.</p>
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 overflow-hidden">
-          <table className="w-full">
+        <>
+          <div className="hidden md:block bg-white border border-gray-200 overflow-x-auto">
+            <table className="w-full">
             <thead>
               <tr className="bg-gray-50 border-b border-gray-100">
-                {['Apartment', 'Label', 'Start', 'End', 'Price / Night', 'Actions'].map((col) => (
+                {['Apartman', 'Naziv', 'Početak', 'Kraj', 'Cijena / noć', 'Radnje'].map((col) => (
                   <th key={col} className="text-left px-5 py-3 text-xs font-sans text-gray-400 uppercase tracking-widest">
                     {col}
                   </th>
@@ -86,8 +87,29 @@ export default async function AdminPricingPage() {
                 </tr>
               ))}
             </tbody>
-          </table>
-        </div>
+            </table>
+          </div>
+          <div className="md:hidden space-y-3">
+            {seasons.map((season) => (
+              <div key={season.id} className="bg-white border border-gray-200 p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <div className="text-sm font-sans text-charcoal">{season.apartment.name}</div>
+                    <div className="inline-flex items-center gap-1 mt-2 px-2.5 py-1 bg-gold/10 text-gold text-xs font-sans">
+                      <Tag size={10} />
+                      {season.label}
+                    </div>
+                  </div>
+                  <DeleteSeasonButton id={season.id} />
+                </div>
+                <div className="text-xs text-gray-500">
+                  {fmtDate(season.startDate)} – {fmtDate(season.endDate)}
+                </div>
+                <div className="font-serif text-sm text-charcoal">{fmtEur(season.pricePerNight)} / noć</div>
+              </div>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )

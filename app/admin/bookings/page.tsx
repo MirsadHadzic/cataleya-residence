@@ -9,7 +9,7 @@ import { CalendarCheck, Users, Plus, Ban } from 'lucide-react'
 import Link from 'next/link'
 
 function fmtDate(date: Date): string {
-  return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+  return date.toLocaleDateString('bs-BA', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
 function getNights(checkIn: Date, checkOut: Date): number {
@@ -17,18 +17,23 @@ function getNights(checkIn: Date, checkOut: Date): number {
 }
 
 function fmtEur(amount: number): string {
-  return new Intl.NumberFormat('en-EU', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(amount)
+  return new Intl.NumberFormat('bs-BA', { style: 'currency', currency: 'EUR', minimumFractionDigits: 0 }).format(amount)
 }
 
 type BadgeStyle = { bg: string; text: string; label: string }
 
 const STATUS_STYLES: Record<string, BadgeStyle> = {
-  PENDING:   { bg: 'bg-amber-50 border border-amber-200',  text: 'text-amber-700',  label: 'Pending' },
-  CONFIRMED: { bg: 'bg-green-50 border border-green-200',  text: 'text-green-700',  label: 'Confirmed' },
-  CANCELLED: { bg: 'bg-red-50   border border-red-200',    text: 'text-red-600',    label: 'Cancelled' },
+  PENDING:   { bg: 'bg-amber-50 border border-amber-200',  text: 'text-amber-700',  label: 'Na čekanju' },
+  CONFIRMED: { bg: 'bg-green-50 border border-green-200',  text: 'text-green-700',  label: 'Potvrđena' },
+  CANCELLED: { bg: 'bg-red-50   border border-red-200',    text: 'text-red-600',    label: 'Otkazana' },
 }
 
-export default async function AdminBookingsPage() {
+export default async function AdminBookingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ email?: string }>
+}) {
+  const { email } = await searchParams
   const [bookings, apartments, blockedDates] = await Promise.all([
     prisma.booking.findMany({
       orderBy: { createdAt: 'desc' },
@@ -79,25 +84,30 @@ export default async function AdminBookingsPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="font-serif text-2xl text-charcoal mb-1">Bookings</h2>
-          <p className="text-gray-500 text-sm font-sans font-light">Manage all bookings and blocked dates.</p>
+          <h2 className="font-serif text-2xl text-charcoal mb-1">Rezervacije</h2>
+          <p className="text-gray-500 text-sm font-sans font-light">Upravljajte rezervacijama i blokiranim datumima.</p>
         </div>
+        {email === 'failed' && (
+          <div className="bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+            Rezervacija je kreirana, ali e-mail potvrda gostu nije poslana. Provjerite Resend konfiguraciju.
+          </div>
+        )}
         <Link
           href="/admin/bookings/new"
           className="flex items-center gap-2 px-5 py-2.5 bg-charcoal text-white text-sm font-sans hover:bg-charcoal-light transition-colors"
         >
           <Plus size={15} />
-          Manual Booking
+          Ručna rezervacija
         </Link>
       </div>
 
       {/* Analytics */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'This Month', value: String(bookingsThisMonth), sub: now.toLocaleString('en-GB', { month: 'long', year: 'numeric' }), accent: true },
-          { label: 'Est. Revenue', value: fmtEur(estimatedRevenue), sub: 'Excl. cancelled', accent: true },
-          { label: 'Avg. Stay', value: avgNights > 0 ? `${avgNights.toFixed(1)}n` : '-', sub: 'nights per booking', accent: true },
-          { label: 'Pending', value: String(pending), sub: 'awaiting action', accent: false, amber: true },
+          { label: 'Ovaj mjesec', value: String(bookingsThisMonth), sub: now.toLocaleString('bs-BA', { month: 'long', year: 'numeric' }), accent: true },
+          { label: 'Procijenjeni prihod', value: fmtEur(estimatedRevenue), sub: 'Bez otkazanih', accent: true },
+          { label: 'Prosječan boravak', value: avgNights > 0 ? `${avgNights.toFixed(1)}` : '-', sub: 'noćenja po rezervaciji', accent: true },
+          { label: 'Na čekanju', value: String(pending), sub: 'čeka obradu', accent: false, amber: true },
         ].map(({ label, value, sub, accent, amber }) => (
           <div key={label} className={`bg-white border border-gray-200 p-5 border-l-2 ${amber ? 'border-l-amber-400' : 'border-l-gold'}`}>
             <div className="text-xs font-sans uppercase tracking-widest text-gray-400 mb-2">{label}</div>
@@ -110,10 +120,10 @@ export default async function AdminBookingsPage() {
       {/* Status summary */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total', value: total, color: 'text-charcoal' },
-          { label: 'Pending', value: pending, color: 'text-amber-600' },
-          { label: 'Confirmed', value: confirmed, color: 'text-green-600' },
-          { label: 'Cancelled', value: cancelled, color: 'text-red-500' },
+          { label: 'Ukupno', value: total, color: 'text-charcoal' },
+          { label: 'Na čekanju', value: pending, color: 'text-amber-600' },
+          { label: 'Potvrđene', value: confirmed, color: 'text-green-600' },
+          { label: 'Otkazane', value: cancelled, color: 'text-red-500' },
         ].map(({ label, value, color }) => (
           <div key={label} className="bg-white border border-gray-200 p-5">
             <div className={`font-serif text-3xl mb-1 ${color}`}>{value}</div>
@@ -126,7 +136,7 @@ export default async function AdminBookingsPage() {
       {bookings.length === 0 ? (
         <div className="bg-white border border-gray-200 p-16 text-center">
           <CalendarCheck size={32} className="text-gold mx-auto mb-4" strokeWidth={1.5} />
-          <p className="text-gray-400 text-sm font-sans">No bookings yet.</p>
+          <p className="text-gray-400 text-sm font-sans">Još nema rezervacija.</p>
         </div>
       ) : (
         <>
@@ -135,7 +145,7 @@ export default async function AdminBookingsPage() {
             <table className="w-full">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-100">
-                  {['Source','Apartment','Guest','Dates','Guests','Price/Night','Est. Total','Status','Actions'].map((col) => (
+                  {['Izvor','Apartman','Gost','Datumi','Gosti','Cijena/noć','Ukupno','Status','Radnje'].map((col) => (
                     <th key={col} className="text-left px-4 py-3 text-xs font-sans font-500 text-gray-400 uppercase tracking-widest whitespace-nowrap">{col}</th>
                   ))}
                 </tr>
@@ -156,7 +166,7 @@ export default async function AdminBookingsPage() {
                     <tr key={booking.id} className="hover:bg-gray-50/60 transition-colors">
                       <td className="px-4 py-4">
                         <span className={`inline-flex items-center px-2 py-0.5 text-xs font-sans ${isManual ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>
-                          {isManual ? 'Manual' : 'Website'}
+                          {isManual ? 'Ručno' : 'Web-stranica'}
                         </span>
                       </td>
                       <td className="px-4 py-4 text-sm font-sans font-500 text-charcoal whitespace-nowrap">{booking.apartment.name}</td>
@@ -166,12 +176,12 @@ export default async function AdminBookingsPage() {
                             <div className="text-sm font-sans text-charcoal">{guestName}</div>
                             {guestEmail && <a href={`mailto:${guestEmail}`} className="text-xs text-gold hover:underline font-light block">{guestEmail}</a>}
                           </div>
-                        ) : <span className="text-xs text-gray-400 italic">No match</span>}
+                        ) : <span className="text-xs text-gray-400 italic">Nema podudaranja</span>}
                       </td>
                       <td className="px-4 py-4">
                         <div className="text-sm font-sans text-charcoal">{fmtDate(booking.checkIn)}</div>
-                        <div className="text-xs text-gray-400">to {fmtDate(booking.checkOut)}</div>
-                        <div className="text-xs text-taupe">{nights}n</div>
+                        <div className="text-xs text-gray-400">do {fmtDate(booking.checkOut)}</div>
+                        <div className="text-xs text-taupe">{nights} noćenja</div>
                       </td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-1 text-sm text-charcoal font-sans">
@@ -204,6 +214,7 @@ export default async function AdminBookingsPage() {
               const ppn = booking.pricePerNight ?? booking.apartment.pricePerNight
               const total = booking.totalPrice ?? nights * ppn
               const guestName = booking.guestName || inquiry?.name
+              const guestEmail = booking.guestEmail || inquiry?.email
               const isManual = booking.source === 'MANUAL'
 
               return (
@@ -212,22 +223,23 @@ export default async function AdminBookingsPage() {
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className={`inline-flex px-2 py-0.5 text-xs font-sans ${isManual ? 'bg-blue-50 text-blue-600 border border-blue-100' : 'bg-gray-100 text-gray-500 border border-gray-200'}`}>
-                          {isManual ? 'Manual' : 'Website'}
+                          {isManual ? 'Ručno' : 'Web-stranica'}
                         </span>
                       </div>
                       <div className="font-serif text-base text-charcoal">{booking.apartment.name}</div>
                       {guestName && <div className="text-xs text-taupe font-sans font-light">{guestName}</div>}
+                      {guestEmail && <a href={`mailto:${guestEmail}`} className="text-xs text-gold font-light">{guestEmail}</a>}
                     </div>
                     <span className={`inline-flex px-2.5 py-1 text-xs font-sans font-500 flex-shrink-0 ${style.bg} ${style.text}`}>{style.label}</span>
                   </div>
                   <div className="flex items-center gap-4 py-3 border-t border-b border-gray-100">
                     <div>
-                      <div className="text-xs text-gray-400 uppercase tracking-widest font-sans mb-0.5">Check In</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-widest font-sans mb-0.5">Dolazak</div>
                       <div className="text-sm text-charcoal font-sans">{fmtDate(booking.checkIn)}</div>
                     </div>
                     <div className="h-px flex-1 bg-gray-200" />
                     <div>
-                      <div className="text-xs text-gray-400 uppercase tracking-widest font-sans mb-0.5">Check Out</div>
+                      <div className="text-xs text-gray-400 uppercase tracking-widest font-sans mb-0.5">Odlazak</div>
                       <div className="text-sm text-charcoal font-sans">{fmtDate(booking.checkOut)}</div>
                     </div>
                   </div>
@@ -235,15 +247,15 @@ export default async function AdminBookingsPage() {
                     <div className="flex items-center gap-1 text-sm text-charcoal font-sans">
                       <Users size={13} className="text-gold" strokeWidth={1.5} />
                       {booking.guests}
-                      <span className="text-gray-400 ml-1">&bull; {nights}n</span>
+                      <span className="text-gray-400 ml-1">&bull; {nights} noćenja</span>
                     </div>
                     <span className="font-serif text-sm text-charcoal">{fmtEur(total)}</span>
                   </div>
                   <div className="flex items-center justify-between py-2 border-t border-gray-100">
-                    <span className="text-xs text-gray-400 font-sans uppercase tracking-widest">Est. Total</span>
+                    <span className="text-xs text-gray-400 font-sans uppercase tracking-widest">Ukupno</span>
                     <div className="text-right">
                       <span className="font-serif text-sm text-charcoal">{fmtEur(total)}</span>
-                      <span className="text-xs text-gray-400 font-sans ml-1">({nights}n x {fmtEur(ppn)})</span>
+                      <span className="text-xs text-gray-400 font-sans ml-1">({nights} × {fmtEur(ppn)})</span>
                     </div>
                   </div>
                   <BookingStatusButtons bookingId={booking.id} status={booking.status} />
@@ -259,15 +271,15 @@ export default async function AdminBookingsPage() {
         <div className="bg-white border border-gray-200 p-6">
           <div className="flex items-center gap-2 mb-5">
             <Ban size={16} className="text-gold" strokeWidth={1.5} />
-            <h3 className="font-serif text-lg text-charcoal">Block Dates</h3>
+            <h3 className="font-serif text-lg text-charcoal">Blokiraj datume</h3>
           </div>
           <BlockDatesForm apartments={apartments} />
         </div>
 
         <div className="bg-white border border-gray-200 p-6">
-          <h3 className="font-serif text-lg text-charcoal mb-5">Blocked Periods</h3>
+          <h3 className="font-serif text-lg text-charcoal mb-5">Blokirani periodi</h3>
           {blockedDates.length === 0 ? (
-            <p className="text-gray-400 text-sm font-sans">No dates blocked.</p>
+            <p className="text-gray-400 text-sm font-sans">Nema blokiranih datuma.</p>
           ) : (
             <div className="space-y-2">
               {blockedDates.map((bd) => (
@@ -275,7 +287,7 @@ export default async function AdminBookingsPage() {
                   <div>
                     <div className="text-sm font-sans text-charcoal">{bd.apartment.name}</div>
                     <div className="text-xs text-gray-400 font-light">
-                      {fmtDate(bd.startDate)} to {fmtDate(bd.endDate)}
+                      {fmtDate(bd.startDate)} do {fmtDate(bd.endDate)}
                       {bd.reason && <span className="ml-1 italic">({bd.reason})</span>}
                     </div>
                   </div>

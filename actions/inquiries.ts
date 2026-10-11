@@ -4,6 +4,7 @@
 import { prisma } from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { verifyAdminSession } from '@/lib/auth'
+import { sendBookingConfirmation } from '@/lib/email'
 import {
   checkAvailability,
   nightsBetween,
@@ -12,7 +13,7 @@ import {
 
 export async function updateInquiryStatus(
   id: string,
-  status: 'PENDING' | 'CONTACTED' | 'CONFIRMED' | 'CANCELLED'
+  status: 'PENDING' | 'CONTACTED' | 'CANCELLED'
 ): Promise<void> {
   await verifyAdminSession()
   await prisma.bookingInquiry.update({ where: { id }, data: { status } })
@@ -24,10 +25,12 @@ export async function convertInquiryToBooking(inquiryId: string): Promise<{ ok: 
 
   const inq = await prisma.bookingInquiry.findUnique({
     where: { id: inquiryId },
-    include: { apartment: { select: { pricePerNight: true, maxGuests: true } } },
+    include: { apartment: { select: { name: true, pricePerNight: true, maxGuests: true } } },
   })
 
-  if (!inq) return { ok: false, message: 'Inquiry not found.' }
+  if (!inq) return { ok: false, message: 'Zahtjev nije pronađen.' }
+  if (inq.status === 'CONFIRMED') return { ok: false, message: 'Ovaj zahtjev je već potvrđen.' }
+  if (inq.status === 'CANCELLED') return { ok: false, message: 'Otkazani zahtjev se ne može potvrditi.' }
 
   const checkIn = parseDateInput(inq.checkIn)
   const checkOut = parseDateInput(inq.checkOut)
@@ -47,33 +50,20 @@ export async function convertInquiryToBooking(inquiryId: string): Promise<{ ok: 
     guestPhone: inq.phone,
     pricePerNight: ppn,
     totalPrice: total,
-    notes: `Converted from inquiry #${inq.id.slice(-8)}`,
+    notes: `Pretvoreno iz zahtjeva #${inq.id.slice(-8)}`,
   }
 
-  // Legacy: website used to create a PENDING booking alongside the inquiry — upgrade it
+  // Reuse a matching legacy pending booking without touching another guest's request.
   const existingPending = await prisma.booking.findFirst({
     where: {
       apartmentId: inq.apartmentId,
       status: 'PENDING',
-      AND: [{ checkIn: { lt: checkOut } }, { checkOut: { gt: checkIn } }],
+      checkIn,
+      checkOut,
+      guestEmail: inq.email,
     },
     orderBy: { createdAt: 'desc' },
   })
-
-  if (existingPending) {
-    await prisma.$transaction([
-      prisma.booking.update({
-        where: { id: existingPending.id },
-        data: bookingData,
-      }),
-      prisma.bookingInquiry.update({ where: { id: inquiryId }, data: { status: 'CONFIRMED' } }),
-    ])
-
-    revalidatePath('/admin/inquiries')
-    revalidatePath('/admin/bookings')
-    revalidatePath(`/apartments`)
-    return { ok: true, message: 'Inquiry converted to booking.' }
-  }
 
   // Only confirmed stays block conversion — pending inquiries from other guests do not
   const avail = await checkAvailability(inq.apartmentId, checkIn, checkOut, {
@@ -81,16 +71,41 @@ export async function convertInquiryToBooking(inquiryId: string): Promise<{ ok: 
   })
 
   if (!avail.available) {
-    return { ok: false, message: avail.reason ?? 'Dates already booked. Cannot convert.' }
+    const reason = avail.reason === 'These dates are blocked.'
+      ? 'Odabrani datumi su blokirani.'
+      : 'Datumi su već rezervisani.'
+    return { ok: false, message: `${reason} Nije moguće potvrditi zahtjev.` }
   }
 
-  await prisma.$transaction([
-    prisma.booking.create({ data: bookingData }),
-    prisma.bookingInquiry.update({ where: { id: inquiryId }, data: { status: 'CONFIRMED' } }),
-  ])
+  const settings = await prisma.siteSettings.findFirst({ select: { bookingEmail: true } })
+  await prisma.$transaction(async (tx) => {
+    if (existingPending) {
+      await tx.booking.update({ where: { id: existingPending.id }, data: bookingData })
+    } else {
+      await tx.booking.create({ data: bookingData })
+    }
+    await tx.bookingInquiry.update({ where: { id: inquiryId }, data: { status: 'CONFIRMED' } })
+  })
+
+  const emailResult = await sendBookingConfirmation({
+    apartmentName: inq.apartment.name,
+    checkIn,
+    checkOut,
+    guests: inq.guests,
+    name: inq.name,
+    email: inq.email,
+    phone: inq.phone ?? '',
+    message: inq.message,
+  }, settings?.bookingEmail || process.env.BOOKING_EMAIL)
 
   revalidatePath('/admin/inquiries')
   revalidatePath('/admin/bookings')
-  revalidatePath(`/apartments`)
-  return { ok: true, message: 'Inquiry converted to booking.' }
+  revalidatePath('/admin')
+  revalidatePath('/apartments')
+  return {
+    ok: true,
+    message: emailResult.sent
+      ? 'Rezervacija je potvrđena, a gostu je poslana e-mail potvrda.'
+      : `Rezervacija je potvrđena, ali e-mail gostu nije poslan: ${emailResult.error}`,
+  }
 }

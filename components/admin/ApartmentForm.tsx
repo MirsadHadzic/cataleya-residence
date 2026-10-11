@@ -23,7 +23,7 @@ const inp = 'w-full border border-gray-200 px-4 py-2.5 text-sm focus:outline-non
 
 const imageHelpers: Record<string, { label: string; urls: string[] }> = {
   presidentSuite: {
-    label: 'Load Cataleya 1 images',
+    label: 'Učitaj slike za Cataleya 1',
     urls: [
       '/images/apartments/Cataleya-1/bedroom-0.jpg',
       '/images/apartments/Cataleya-1/bedroom-1.jpg',
@@ -37,7 +37,7 @@ const imageHelpers: Record<string, { label: string; urls: string[] }> = {
     ],
   },
   cataleya3: {
-    label: 'Load Cataleya 3 images',
+    label: 'Učitaj slike za Cataleya 3',
     urls: [
       '/images/apartments/cataleya-3/livingroom.jpg',
       '/images/apartments/cataleya-3/livingroom0.jpg',
@@ -50,17 +50,8 @@ const imageHelpers: Record<string, { label: string; urls: string[] }> = {
       '/images/apartments/cataleya-3/bedroom1.jpg',
     ],
   },
-  maisonNoire: {
-    label: 'Load Maison Noire images',
-    urls: [
-      'https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=1200&q=85',
-      'https://images.unsplash.com/photo-1614604600420-f1b3b1e74f3b?w=1200&q=85',
-      'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=1200&q=85',
-      'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=1200&q=85',
-    ],
-  },
   cataleya1: {
-    label: 'Load Cataleya 2 images',
+    label: 'Učitaj slike za Cataleya 2',
     urls: [
       '/images/apartments/cataleya 2/IMG-20260707-WA0002.jpg',
       '/images/apartments/cataleya 2/IMG-20260707-WA0003.jpg',
@@ -72,7 +63,7 @@ const imageHelpers: Record<string, { label: string; urls: string[] }> = {
   },
 }
 
-export function ApartmentForm({ action, initialData = {}, submitLabel = 'Save Apartment' }: Props) {
+export function ApartmentForm({ action, initialData = {}, submitLabel = 'Sačuvaj apartman' }: Props) {
   const [state, formAction, pending] = useActionState(action, init)
   const err = state.errors ?? {}
 
@@ -91,7 +82,7 @@ export function ApartmentForm({ action, initialData = {}, submitLabel = 'Save Ap
   const imageUrls = images.split('\n').map((line) => line.trim()).filter(Boolean)
 
   return (
-    <form action={formAction} className="bg-white border border-gray-200 p-8 space-y-6">
+    <form action={formAction} className="bg-white border border-gray-200 p-4 sm:p-6 md:p-8 space-y-6">
 
       {state.message && (
         <div className={`flex items-start gap-2 p-3 border ${state.success ? 'bg-green-50 border-green-100' : 'bg-red-50 border-red-100'}`}>
@@ -102,95 +93,95 @@ export function ApartmentForm({ action, initialData = {}, submitLabel = 'Save Ap
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         <div className="md:col-span-2">
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Name *</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Naziv *</label>
           <input name="name" type="text" required value={name}
-            onChange={(e) => setName(e.target.value)} placeholder="Cataleya One" className={inp} />
+            onChange={(e) => setName(e.target.value)}             placeholder="Cataleya 1" className={inp} />
           {err.name && <p className="text-red-500 text-xs mt-1">{err.name[0]}</p>}
         </div>
 
         <div>
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Internal Name <span className="normal-case tracking-normal text-gray-400">(admin only)</span>
+            Interni naziv <span className="normal-case tracking-normal text-gray-400">(samo administracija)</span>
           </label>
           <input name="internalName" type="text" defaultValue={initialData.internalName ?? ''}
             placeholder="CAT-01" className={inp} />
-          <p className="text-gray-400 text-xs mt-1 font-light">Used internally for reference. Not shown to guests.</p>
+          <p className="text-gray-400 text-xs mt-1 font-light">Interna oznaka koja se ne prikazuje gostima.</p>
         </div>
 
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Slug *</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">URL naziv *</label>
           <input name="slug" type="text" required value={slug}
             onChange={(e) => { setSlug(e.target.value); setAutoSlug(false) }}
-            placeholder="prestige-suite" className={inp} />
+            placeholder="cataleya-1" className={inp} />
           {err.slug && <p className="text-red-500 text-xs mt-1">{err.slug[0]}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Tagline</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Kratki slogan</label>
           <input name="tagline" type="text" defaultValue={initialData.tagline ?? ''}
-            placeholder="Old Town Views - Refined Elegance" className={inp} />
+            placeholder="Udobnost i moderan smještaj" className={inp} />
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Short Description *</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Kratki opis *</label>
           <textarea name="description" rows={3} required defaultValue={initialData.description ?? ''}
-            placeholder="A masterfully designed suite..." className={`${inp} resize-none`} />
+            placeholder="Kratki opis apartmana..." className={`${inp} resize-none`} />
           {err.description && <p className="text-red-500 text-xs mt-1">{err.description[0]}</p>}
         </div>
 
         <div className="md:col-span-2">
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Full Description</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Detaljan opis</label>
           <textarea name="longDescription" rows={6} defaultValue={initialData.longDescription ?? ''}
-            placeholder="Detailed apartment description..." className={`${inp} resize-none`} />
+            placeholder="Detaljan opis apartmana..." className={`${inp} resize-none`} />
         </div>
 
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Price / Night (EUR) *</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Cijena / noć (EUR) *</label>
           <input name="pricePerNight" type="number" step="0.01" required
             defaultValue={initialData.pricePerNight ?? ''} placeholder="280" className={inp} />
           {err.pricePerNight && <p className="text-red-500 text-xs mt-1">{err.pricePerNight[0]}</p>}
         </div>
 
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Max Guests *</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Najveći broj gostiju *</label>
           <input name="maxGuests" type="number" min="1" max="20" required
             defaultValue={initialData.maxGuests ?? 2} className={inp} />
         </div>
 
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Bedrooms</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Spavaće sobe</label>
           <input name="bedrooms" type="number" min="0" defaultValue={initialData.bedrooms ?? 1} className={inp} />
         </div>
 
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Bathrooms</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Kupatila</label>
           <input name="bathrooms" type="number" min="1" defaultValue={initialData.bathrooms ?? 1} className={inp} />
         </div>
 
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Size (m2)</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Veličina (m²)</label>
           <input name="size" type="number" min="1" defaultValue={initialData.size ?? ''} placeholder="85" className={inp} />
         </div>
 
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Location *</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Lokacija *</label>
           <input name="location" type="text" required defaultValue={initialData.location ?? ''}
-            placeholder="Bascarsija, Sarajevo" className={inp} />
+            placeholder="Ilidža, Sarajevo" className={inp} />
           {err.location && <p className="text-red-500 text-xs mt-1">{err.location[0]}</p>}
         </div>
 
         <div className="md:col-span-2">
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">
-            Amenities <span className="normal-case tracking-normal text-gray-400">(comma-separated)</span>
+            Sadržaji <span className="normal-case tracking-normal text-gray-400">(odvojite zarezima)</span>
           </label>
           <textarea name="amenities" rows={3} defaultValue={(initialData.amenities ?? []).join(', ')}
-            placeholder="Free Wi-Fi, Air Conditioning, King Bed, ..." className={`${inp} resize-none`} />
+            placeholder="Wi-Fi, klima-uređaj..." className={`${inp} resize-none`} />
         </div>
 
         <div className="md:col-span-2">
           <div className="flex flex-col gap-3 mb-2 md:flex-row md:items-center md:justify-between">
             <label className="block text-xs font-sans uppercase tracking-widest text-gray-500">
-              Image URLs <span className="normal-case tracking-normal text-gray-400">(one per line)</span>
+              URL-ovi slika <span className="normal-case tracking-normal text-gray-400">(jedan po redu)</span>
             </label>
             <div className="flex flex-wrap gap-2">
               {Object.values(imageHelpers).map((helper) => (
@@ -203,7 +194,7 @@ export function ApartmentForm({ action, initialData = {}, submitLabel = 'Save Ap
           </div>
           <textarea name="images" rows={5} value={images}
             onChange={(e) => setImages(e.target.value)}
-            placeholder="https://images.unsplash.com/..." className={`${inp} resize-none font-mono text-xs`} />
+            placeholder="/images/apartments/naziv-apartmana/slika.jpg" className={`${inp} resize-none font-mono text-xs`} />
           {/* Image preview */}
           {imageUrls.length > 0 && (
             <div className="flex gap-2 mt-2 flex-wrap">
@@ -220,12 +211,12 @@ export function ApartmentForm({ action, initialData = {}, submitLabel = 'Save Ap
           <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
             <input name="featured" type="checkbox" value="true"
               defaultChecked={initialData.featured ?? false} className="accent-gold" />
-            Featured
+            Istaknut
           </label>
           <label className="flex items-center gap-2 text-sm text-gray-600 cursor-pointer">
             <input name="active" type="checkbox" value="true"
               defaultChecked={initialData.active ?? true} className="accent-gold" />
-            Active (visible on site)
+            Aktivan (vidljiv na stranici)
           </label>
         </div>
       </div>
@@ -237,7 +228,7 @@ export function ApartmentForm({ action, initialData = {}, submitLabel = 'Save Ap
           {submitLabel}
         </button>
         <Link href="/admin/apartments" className="text-sm text-gray-500 hover:text-charcoal font-sans transition-colors">
-          Cancel
+          Odustani
         </Link>
       </div>
     </form>

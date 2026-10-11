@@ -26,31 +26,31 @@ export function BlockDatesForm({ apartments }: { apartments: Apt[] }) {
         </div>
       )}
       <div>
-        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Apartment</label>
+        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Apartman</label>
         <select name="apartmentId" className={inp}>
           {apartments.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
         </select>
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Start Date</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Datum početka</label>
           <input name="startDate" type="date" required className={inp} />
           {err.startDate && <p className="text-red-500 text-xs mt-1">{err.startDate[0]}</p>}
         </div>
         <div>
-          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">End Date</label>
+          <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Datum završetka</label>
           <input name="endDate" type="date" required className={inp} />
           {err.endDate && <p className="text-red-500 text-xs mt-1">{err.endDate[0]}</p>}
         </div>
       </div>
       <div>
-        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Reason (optional)</label>
-        <input name="reason" type="text" placeholder="Maintenance, owner stay..." className={inp} />
+        <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Razlog (opcionalno)</label>
+        <input name="reason" type="text" placeholder="Održavanje, boravak vlasnika..." className={inp} />
       </div>
       <button type="submit" disabled={pending}
         className="flex items-center gap-2 px-5 py-2.5 bg-charcoal text-white text-sm font-sans hover:bg-charcoal-light transition-colors disabled:opacity-60">
         {pending && <Loader2 size={13} className="animate-spin" />}
-        Block Dates
+        Blokiraj datume
       </button>
     </form>
   )
