@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   },
   description:
     'Discover Sarajevo through the lens of luxury living. Cataleya Residence offers three impeccably designed apartments in the heart of the city.',
+  verification: {
+    google: 'lMT31cZK1F0MDUxNRymcDWXwSCQ8ssv7IsvIi1fImyw',
+  },
   icons: {
     icon: '/favicon.png',
     shortcut: '/favicon.png',

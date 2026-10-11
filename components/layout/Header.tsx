@@ -39,8 +39,10 @@ export function Header() {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 right-0 z-50 transition-all duration-500',
-        isTransparent
+        'fixed top-0 left-0 right-0 z-50 transition-colors duration-500',
+        menuOpen
+          ? 'bg-charcoal'
+          : isTransparent
           ? 'bg-transparent'
           : 'bg-ivory/95 backdrop-blur-sm border-b border-champagne'
       )}
@@ -130,7 +132,8 @@ export function Header() {
       <div
         id="mobile-navigation"
         className={cn(
-          'md:hidden fixed left-0 right-0 bottom-0 top-20 bg-[#1C1C1C] z-50 flex flex-col transition-opacity duration-300',
+          'md:hidden fixed inset-x-0 top-20 bottom-0 bg-charcoal z-50 flex flex-col overflow-y-auto',
+          'transition-opacity duration-300',
           menuOpen ? 'opacity-100 pointer-events-auto visible' : 'invisible opacity-0 pointer-events-none'
         )}
         aria-hidden={!menuOpen}
