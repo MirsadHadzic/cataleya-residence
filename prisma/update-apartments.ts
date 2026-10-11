@@ -5,12 +5,12 @@ const prisma = new PrismaClient()
 const apartments = [
   {
     aliases: ['president-suite', 'cataleya-1'],
-    oldName: 'President Suite',
-    name: 'Cataleya 1',
+    oldName: 'Cataleya 1',
+    name: 'President Suite',
     pricePerNight: 80,
-    tagline: 'President Suite - Largest Apartment',
+    tagline: 'Cataleya 1 · Largest Apartment',
     description: 'The largest apartment at Cataleya Residence, offering a comfortable stay in Sarajevo.',
-    longDescription: 'Cataleya 1 is the largest apartment at Cataleya Residence and offers a spacious base for your stay in Sarajevo.',
+    longDescription: 'President Suite (Cataleya 1) is the largest apartment at Cataleya Residence and offers a spacious base for your stay in Sarajevo.',
     amenities: [],
     images: [
       '/images/apartments/Cataleya-1/bedroom-0.jpg',
@@ -21,12 +21,12 @@ const apartments = [
   },
   {
     aliases: ['lumiere-apartment', 'cataleya-2'],
-    oldName: 'Lumiere Apartment',
-    name: 'Cataleya 2',
+    oldName: 'Cataleya 2',
+    name: 'Lumiere',
     pricePerNight: 70,
-    tagline: 'Smallest Apartment - Private Entrance',
+    tagline: 'Cataleya 2 · Smallest Apartment · Private Entrance',
     description: 'The smallest apartment at Cataleya Residence, with its own entrance.',
-    longDescription: 'Cataleya 2 is the smallest apartment at Cataleya Residence and has its own entrance.',
+    longDescription: 'Lumiere (Cataleya 2) is the smallest apartment at Cataleya Residence and has its own entrance.',
     amenities: ['Private Entrance'],
     images: [
       '/images/apartments/cataleya 2/IMG-20260707-WA0002.jpg',
@@ -39,12 +39,12 @@ const apartments = [
   },
   {
     aliases: ['maison-noire', 'cataleya-3'],
-    oldName: 'Maison Noire',
-    name: 'Cataleya 3',
+    oldName: 'Cataleya 3',
+    name: 'Maison Noire',
     pricePerNight: 90,
-    tagline: 'Green Apartment',
+    tagline: 'Cataleya 3 · Green Apartment',
     description: 'A comfortable apartment at Cataleya Residence featuring its distinctive green interior.',
-    longDescription: 'Cataleya 3 is the apartment with the green interior, offering a comfortable stay in Sarajevo.',
+    longDescription: 'Maison Noire (Cataleya 3) is the apartment with the green interior, offering a comfortable stay in Sarajevo.',
     amenities: [],
     images: [
       '/images/apartments/cataleya-3/livingroom.jpg',

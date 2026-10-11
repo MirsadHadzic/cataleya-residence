@@ -11,16 +11,16 @@ async function main() {
   await prisma.blockedDate.deleteMany()
   await prisma.apartment.deleteMany()
 
-  // Cataleya 1 is the largest apartment (formerly listed as President Suite).
+  // President Suite is Cataleya 1, the largest apartment.
   await prisma.apartment.create({
     data: {
-      name: 'Cataleya 1',
+      name: 'President Suite',
       slug: 'cataleya-1',
-      tagline: 'President Suite - Largest Apartment',
+      tagline: 'Cataleya 1 - Largest Apartment',
       description:
         'The largest apartment at Cataleya Residence, offering a comfortable stay in Sarajevo.',
       longDescription:
-        'Cataleya 1 is the largest apartment at Cataleya Residence. It offers a spacious and comfortable base for your stay in Sarajevo.',
+        'President Suite (Cataleya 1) is the largest apartment at Cataleya Residence. It offers a spacious and comfortable base for your stay in Sarajevo.',
       pricePerNight: 80,
       maxGuests: 2,
       bedrooms: 1,
@@ -39,16 +39,16 @@ async function main() {
     },
   })
 
-  // Cataleya 2 is the smallest apartment and has its own entrance.
+  // Lumiere is Cataleya 2, the smallest apartment with its own entrance.
   await prisma.apartment.create({
     data: {
-      name: 'Cataleya 2',
+      name: 'Lumiere',
       slug: 'cataleya-2',
-      tagline: 'Smallest Apartment - Private Entrance',
+      tagline: 'Cataleya 2 - Smallest Apartment - Private Entrance',
       description:
         'The smallest apartment at Cataleya Residence, with its own entrance.',
       longDescription:
-        'Cataleya 2 is the smallest apartment at Cataleya Residence and has its own entrance.',
+        'Lumiere (Cataleya 2) is the smallest apartment at Cataleya Residence and has its own entrance.',
       pricePerNight: 70,
       maxGuests: 4,
       bedrooms: 2,
@@ -69,16 +69,16 @@ async function main() {
     },
   })
 
-  // Cataleya 3 is the green apartment.
+  // Maison Noire is Cataleya 3, the apartment with the green interior.
   await prisma.apartment.create({
     data: {
-      name: 'Cataleya 3',
+      name: 'Maison Noire',
       slug: 'cataleya-3',
-      tagline: 'Green Apartment',
+      tagline: 'Cataleya 3 - Green Apartment',
       description:
         'A comfortable apartment at Cataleya Residence featuring its distinctive green interior.',
       longDescription:
-        'Cataleya 3 is the apartment with the green interior, offering a comfortable stay in Sarajevo.',
+        'Maison Noire (Cataleya 3) is the apartment with the green interior, offering a comfortable stay in Sarajevo.',
       pricePerNight: 90,
       maxGuests: 3,
       bedrooms: 1,
