@@ -9,6 +9,7 @@ import {
   checkAvailability,
   nightsBetween,
   parseDateInput,
+  resolvePrice,
 } from '@/lib/availability'
 
 export async function updateInquiryStatus(
@@ -35,7 +36,7 @@ export async function convertInquiryToBooking(inquiryId: string): Promise<{ ok: 
   const checkIn = parseDateInput(inq.checkIn)
   const checkOut = parseDateInput(inq.checkOut)
   const nights = nightsBetween(checkIn, checkOut)
-  const ppn = inq.apartment.pricePerNight
+  const { pricePerNight: ppn } = await resolvePrice(inq.apartmentId, checkIn, inq.apartment.pricePerNight)
   const total = nights * ppn
 
   const bookingData = {

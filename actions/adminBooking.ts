@@ -150,8 +150,8 @@ export async function blockDates(
   }
 
   const { apartmentId, startDate, endDate, reason } = validated.data
-  const start = new Date(startDate)
-  const end   = new Date(endDate)
+  const start = parseDateInput(startDate)
+  const end   = parseDateInput(endDate)
 
   if (start >= end) {
     return { success: false, message: 'Datum završetka mora biti nakon datuma početka.' }
@@ -210,8 +210,8 @@ export async function createSeasonPrice(
   }
 
   const { apartmentId, label, startDate, endDate, pricePerNight } = validated.data
-  const start = new Date(startDate)
-  const end   = new Date(endDate)
+  const start = parseDateInput(startDate)
+  const end   = parseDateInput(endDate)
 
   if (start >= end) {
     return { success: false, message: 'Datum završetka mora biti nakon datuma početka.' }
@@ -245,7 +245,7 @@ export async function updateSeasonPrice(
 
   const { apartmentId, label, startDate, endDate, pricePerNight } = validated.data
 
-  if (new Date(startDate) >= new Date(endDate)) {
+  if (parseDateInput(startDate) >= parseDateInput(endDate)) {
     return { success: false, message: 'Datum završetka mora biti nakon datuma početka.' }
   }
 
@@ -253,8 +253,8 @@ export async function updateSeasonPrice(
     where: { id },
     data: {
       apartmentId, label,
-      startDate: new Date(startDate),
-      endDate: new Date(endDate),
+      startDate: parseDateInput(startDate),
+      endDate: parseDateInput(endDate),
       pricePerNight,
     },
   })
@@ -267,29 +267,6 @@ export async function deleteSeasonPrice(id: string): Promise<void> {
   await verifyAdminSession()
   await prisma.seasonPrice.delete({ where: { id } })
   revalidatePath('/admin/pricing')
-}
-
-// Season price resolver -- used in booking flow
-export async function resolvePrice(
-  apartmentId: string,
-  checkIn: Date,
-  basePricePerNight: number
-): Promise<{ pricePerNight: number; label: string | null }> {
-
-  const season = await prisma.seasonPrice.findFirst({
-    where: {
-      apartmentId,
-      startDate: { lte: checkIn },
-      endDate:   { gt: checkIn },
-    },
-    orderBy: { startDate: 'desc' },
-  })
-
-  if (season) {
-    return { pricePerNight: season.pricePerNight, label: season.label }
-  }
-
-  return { pricePerNight: basePricePerNight, label: null }
 }
 
 // Confirm / cancel booking -- used by BookingStatusButtons

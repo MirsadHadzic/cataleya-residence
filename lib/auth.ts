@@ -26,6 +26,12 @@ async function getCryptoKey(secret: string): Promise<CryptoKey> {
   )
 }
 
+// No fallback: a default secret in the repo would let anyone forge an admin cookie.
+export function getSessionSecret(): string | null {
+  const secret = process.env.SESSION_SECRET
+  return secret && secret.length >= 16 ? secret : null
+}
+
 export async function signToken(payload: object, secret: string): Promise<string> {
   const payloadStr = JSON.stringify(payload)
   const payloadHex = stringToHex(payloadStr)
@@ -75,7 +81,10 @@ export async function verifyAdminSession(): Promise<any> {
   if (!token) {
     throw new Error('Unauthorized: No session token found')
   }
-  const secret = process.env.SESSION_SECRET || 'fallback_default_secret_key_1234567890'
+  const secret = getSessionSecret()
+  if (!secret) {
+    throw new Error('Unauthorized: SESSION_SECRET is not configured')
+  }
   const session = await verifyToken(token, secret)
   if (!session || !session.expires || session.expires < Date.now()) {
     throw new Error('Unauthorized: Invalid or expired session')

@@ -126,13 +126,15 @@ export async function submitBookingInquiry(
       phone,
       message: message || null,
     }
-    const [adminEmail, guestEmail] = await Promise.all([
+    const [adminEmail] = await Promise.all([
       sendBookingNotification(emailData, bookingEmail),
       sendBookingRequestReceived(emailData, bookingEmail),
     ])
 
-    const emailWarning = !adminEmail.sent || !guestEmail.sent
-      ? ' Zahtjev je sačuvan, ali slanje e-maila nije uspjelo. Provjerite konfiguraciju e-maila ili nas kontaktirajte putem WhatsAppa.'
+    // The request is saved either way; only warn the guest if we (the hosts) weren't notified.
+    // A failed guest confirmation is already logged by sendEmail.
+    const emailWarning = !adminEmail.sent
+      ? ' Zahtjev je sačuvan, ali obavijest nije poslana. Za brži odgovor kontaktirajte nas putem WhatsAppa.'
       : ''
 
     return {

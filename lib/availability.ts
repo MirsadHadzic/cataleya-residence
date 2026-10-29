@@ -84,6 +84,28 @@ export async function checkAvailability(
   return { available: true }
 }
 
+/** Nightly price for a stay: the season covering check-in, else the apartment's base price. */
+export async function resolvePrice(
+  apartmentId: string,
+  checkIn: Date,
+  basePricePerNight: number
+): Promise<{ pricePerNight: number; label: string | null }> {
+  const season = await prisma.seasonPrice.findFirst({
+    where: {
+      apartmentId,
+      startDate: { lte: checkIn },
+      endDate:   { gt: checkIn },
+    },
+    orderBy: { startDate: 'desc' },
+  })
+
+  if (season) {
+    return { pricePerNight: season.pricePerNight, label: season.label }
+  }
+
+  return { pricePerNight: basePricePerNight, label: null }
+}
+
 export function nightsBetween(checkIn: Date, checkOut: Date): number {
   return Math.round((checkOut.getTime() - checkIn.getTime()) / 86400000)
 }

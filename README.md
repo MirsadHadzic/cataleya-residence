@@ -42,7 +42,7 @@ Open http://localhost:3000 — admin panel at `/admin/login`.
    ```bash
    npm run db:update-apartments
    ```
-   This sets President Suite (Cataleya 1) to €80/night, Lumiere (Cataleya 2) to €70/night, and Maison Noire (Cataleya 3) to €90/night.
+   This renames the apartments to Cataleya 1 (€90/night), Cataleya 2 (€80/night) and Cataleya 3 (€70/night).
    Do not run `db:seed` against a live database; it deletes existing reservations.
 
 ## Git LFS

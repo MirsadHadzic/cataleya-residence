@@ -2,7 +2,7 @@
 'use server'
 
 import { cookies } from 'next/headers'
-import { signToken } from '@/lib/auth'
+import { getSessionSecret, signToken } from '@/lib/auth'
 
 export type LoginState = {
   success: boolean
@@ -36,7 +36,10 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   const expires = Date.now() + duration
   const payload = { user: username, expires }
 
-  const secret = process.env.SESSION_SECRET || 'fallback_default_secret_key_1234567890'
+  const secret = getSessionSecret()
+  if (!secret) {
+    return { success: false, message: 'Greška u konfiguraciji servera: SESSION_SECRET nije postavljen.' }
+  }
   const token = await signToken(payload, secret)
 
   const cookieStore = await cookies()

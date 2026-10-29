@@ -23,7 +23,7 @@ const inp = 'w-full border border-gray-200 px-4 py-2.5 text-sm focus:outline-non
 
 const imageHelpers: Record<string, { label: string; urls: string[] }> = {
   presidentSuite: {
-    label: 'Učitaj slike za President Suite (Cataleya 1)',
+    label: 'Učitaj slike za Cataleya 1',
     urls: [
       '/images/apartments/Cataleya-1/bedroom-0.jpg',
       '/images/apartments/Cataleya-1/bedroom-1.jpg',
@@ -37,7 +37,7 @@ const imageHelpers: Record<string, { label: string; urls: string[] }> = {
     ],
   },
   cataleya3: {
-    label: 'Učitaj slike za Maison Noire (Cataleya 3)',
+    label: 'Učitaj slike za Cataleya 2 (zeleni)',
     urls: [
       '/images/apartments/cataleya-3/livingroom.jpg',
       '/images/apartments/cataleya-3/livingroom0.jpg',
@@ -51,11 +51,11 @@ const imageHelpers: Record<string, { label: string; urls: string[] }> = {
     ],
   },
   cataleya1: {
-    label: 'Učitaj slike za Lumiere (Cataleya 2)',
+    label: 'Učitaj slike za Cataleya 3',
     urls: [
+      '/images/apartments/cataleya 2/IMG-20260707-WA0004.jpg',
       '/images/apartments/cataleya 2/IMG-20260707-WA0002.jpg',
       '/images/apartments/cataleya 2/IMG-20260707-WA0003.jpg',
-      '/images/apartments/cataleya 2/IMG-20260707-WA0004.jpg',
       '/images/apartments/cataleya 2/IMG-20260707-WA0005.jpg',
       '/images/apartments/cataleya 2/IMG-20260707-WA0006.jpg',
       '/images/apartments/cataleya 2/IMG-20260707-WA0007.jpg',
@@ -95,7 +95,7 @@ export function ApartmentForm({ action, initialData = {}, submitLabel = 'Sačuva
         <div className="md:col-span-2">
           <label className="block text-xs font-sans uppercase tracking-widest text-gray-500 mb-2">Naziv *</label>
           <input name="name" type="text" required value={name}
-            onChange={(e) => setName(e.target.value)} placeholder="President Suite" className={inp} />
+            onChange={(e) => setName(e.target.value)} placeholder="Cataleya 1" className={inp} />
           {err.name && <p className="text-red-500 text-xs mt-1">{err.name[0]}</p>}
         </div>
 
