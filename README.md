@@ -32,7 +32,7 @@ Open http://localhost:3000 — admin panel at `/admin/login`.
    - `RESEND_FROM_EMAIL` — a sender address verified with Resend
    - `BOOKING_EMAIL`
    - `ADMIN_PASSWORD`
-   - `SESSION_SECRET`
+   - `SESSION_SECRET` (optional — if unset, admin sessions are signed with `ADMIN_PASSWORD`)
 4. Build command: `prisma generate && next build` (or use the default `npm run build` with postinstall).
 5. Initialize an empty production database once:
    ```bash

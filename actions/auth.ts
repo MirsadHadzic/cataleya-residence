@@ -38,7 +38,7 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
 
   const secret = getSessionSecret()
   if (!secret) {
-    return { success: false, message: 'Greška u konfiguraciji servera: SESSION_SECRET nije postavljen.' }
+    return { success: false, message: 'Greška u konfiguraciji servera: ADMIN_PASSWORD nije postavljen.' }
   }
   const token = await signToken(payload, secret)
 

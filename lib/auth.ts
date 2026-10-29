@@ -26,10 +26,13 @@ async function getCryptoKey(secret: string): Promise<CryptoKey> {
   )
 }
 
-// No fallback: a default secret in the repo would let anyone forge an admin cookie.
+// SESSION_SECRET is optional; without it, sessions are signed with the admin password.
+// Never fall back to a constant in the repo — anyone could forge an admin cookie with it.
 export function getSessionSecret(): string | null {
   const secret = process.env.SESSION_SECRET
-  return secret && secret.length >= 16 ? secret : null
+  if (secret && secret.length >= 16) return secret
+  const password = process.env.ADMIN_PASSWORD
+  return password ? `cataleya-admin-session:${password}` : null
 }
 
 export async function signToken(payload: object, secret: string): Promise<string> {
@@ -83,7 +86,7 @@ export async function verifyAdminSession(): Promise<any> {
   }
   const secret = getSessionSecret()
   if (!secret) {
-    throw new Error('Unauthorized: SESSION_SECRET is not configured')
+    throw new Error('Unauthorized: ADMIN_PASSWORD is not configured')
   }
   const session = await verifyToken(token, secret)
   if (!session || !session.expires || session.expires < Date.now()) {
